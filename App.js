@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, SafeAreaView, View, StatusBar, KeyboardAvoidingView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Browser from './Browser';
 import Tabs from './Tabs';
 
@@ -8,38 +7,27 @@ import Tabs from './Tabs';
 export default class App extends React.Component {
   state = {
     currOpenTab: -1,
-    tabs: {},
-    metadata: {},
+    tabs: [],
     id: 0,
+    metadata: [],
   }
 
   componentDidMount() {
-    this.addNewTab("http://www.google.com")
+    this.addNewTab("https://www.google.com");
   }
 
   switchCurrOpenWindow = (tabIdx) => {
     this.setState({ currOpenTab: tabIdx });
   }
 
-  addMetaData = (id, metadata) => {
-    if (id in this.state.tabs) {
-      this.setState({
-        metadata: {
-          ...this.state.metadata,
-          [id]: metadata
-        }
-      })
-    }
-  }
-
   addNewTab = (url) => {
     const uniqueID = this.state.id;
     this.setState({
       id: uniqueID + 1,
-      tabs: {
+      tabs: [
         ...this.state.tabs,
-        [uniqueID]: <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} addMetaData={this.addMetaData} />
-      }
+        <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} metadata={this.state.metadata} />
+      ]
     })
   }
 
@@ -56,9 +44,12 @@ export default class App extends React.Component {
           }}
         >
           <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
-          <View style={styles.browser}>
-            {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} /> : this.state.tabs[this.state.currOpenTab]}
-          </View>
+          {this.state.tabs.map((tab, index) => (
+            <View style={{ ...styles.browser, display: this.state.currOpenTab === index ? 'block' : 'none' }} key={index}>
+              {tab}
+            </View>
+          ))}
+          {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} /> : null}
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
@@ -84,4 +75,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     display: 'flex'
   },
+  display_browser: {
+    display: 'block',
+  },
+  hide_browser: {
+    display: 'hide',
+  }
 });

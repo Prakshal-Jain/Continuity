@@ -13,11 +13,6 @@ import {
 import { WebView } from "react-native-webview";
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import arrowBackIcon from './assets/arrow_back.png';
-import arrowNextIcon from './assets/arrow_next.png';
-import webIcon from './assets/web.png';
-import refreshIcon from './assets/refresh_page.png';
-import incognitoIcon from './assets/incognito.png';
 
 
 // keeps the reference to the browser
@@ -148,11 +143,13 @@ class Browser extends Component {
             canGoBack,
             url
         })
-
-        this.props.addMetaData(this.props.id,
-            {
-                "title": title
-            })
+        
+        if(this.props.id > (this.props.metadata.length-1)){
+            this.props.metadata.push({"title": title, "url": url});
+        }
+        else{
+            this.props.metadata[this.props.id] = {"title": title, "url": url};
+        }
     };
 
     // called when the navigation state changes (page load)
@@ -228,7 +225,7 @@ class Browser extends Component {
                     />
                 </View>
 
-                
+
                 <View style={{ borderTopWidth: 0.5, borderTopColor: '#a9a9a9' }}>
                     <LinearGradient
                         // Button Linear Gradient
@@ -249,10 +246,10 @@ class Browser extends Component {
                         </View>
 
                         <View style={styles.layers}>
-                            <Icon name="chevron-left" size={30} onPress={this.goBack} style={{ color: canGoBack ? 'black' : 'gray' }} disabled={!canGoBack} />
+                            <Icon name="chevron-left" size={30} onPress={this.goBack} style={{ color: canGoBack ? 'black' : '#D3D3D3' }} disabled={!canGoBack} />
                             <Icon name="export-variant" size={25} onPress={this.onShare} />
                             <Icon name="checkbox-multiple-blank-outline" size={25} onPress={this.showTabs} style={{ transform: [{ rotateX: '180deg' }] }} />
-                            <Icon name="chevron-right" size={30} onPress={this.goForward} style={{ color: canGoForward ? 'black' : 'gray' }} disabled={!canGoForward} />
+                            <Icon name="chevron-right" size={30} onPress={this.goForward} style={{ color: canGoForward ? 'black' : '#D3D3D3' }} disabled={!canGoForward} />
                         </View>
                         {/* <TouchableHighlight onPress={this.loadURL}>
                         <Image
@@ -306,14 +303,6 @@ const styles = StyleSheet.create({
     disabled: {
         opacity: 0.3
     },
-    browserTitleContainer: {
-        height: 30,
-        justifyContent: 'center',
-        paddingLeft: 8
-    },
-    browserTitle: {
-        fontWeight: 'bold'
-    },
     browserBar: {
         padding: 10,
         alignItems: 'center',
@@ -348,7 +337,7 @@ const styles = StyleSheet.create({
         marginRight: 8
     },
     browserContainer: {
-        flex: 2,
+        flex: 1,
     }
 });
 
