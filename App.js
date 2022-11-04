@@ -7,16 +7,40 @@ import Tabs from './Tabs';
 
 export default class App extends React.Component {
   state = {
-    currOpenWindow: "browser",
+    currOpenTab: -1,
+    tabs: {},
+    metadata: {},
+    id: 0,
   }
 
-  switchCurrOpenWindow = (window) => {
-    this.setState({ currOpenWindow: window });
+  componentDidMount() {
+    this.addNewTab("http://www.google.com")
   }
 
-  routes = {
-    "tabs": <Tabs />,
-    "browser": <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} />
+  switchCurrOpenWindow = (tabIdx) => {
+    this.setState({ currOpenTab: tabIdx });
+  }
+
+  addMetaData = (id, metadata) => {
+    if (id in this.state.tabs) {
+      this.setState({
+        metadata: {
+          ...this.state.metadata,
+          [id]: metadata
+        }
+      })
+    }
+  }
+
+  addNewTab = (url) => {
+    const uniqueID = this.state.id;
+    this.setState({
+      id: uniqueID + 1,
+      tabs: {
+        ...this.state.tabs,
+        [uniqueID]: <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} addMetaData={this.addMetaData} />
+      }
+    })
   }
 
   render() {
@@ -33,10 +57,8 @@ export default class App extends React.Component {
         >
           <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
           <View style={styles.browser}>
-            {this.routes[this.state.currOpenWindow]}
+            {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} /> : this.state.tabs[this.state.currOpenTab]}
           </View>
-
-
         </KeyboardAvoidingView>
       </SafeAreaView>
     );

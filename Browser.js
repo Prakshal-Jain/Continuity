@@ -23,21 +23,8 @@ import incognitoIcon from './assets/incognito.png';
 // keeps the reference to the browser
 let browserRef = null;
 
-// initial url for the browser
-const url = 'http://www.google.com';
-
-// functions to search using different engines
-const searchEngines = {
-    'google': (uri) => `https://www.google.com/search?q=${uri}`,
-    'duckduckgo': (uri) => `https://duckduckgo.com/?q=${uri}`,
-    'bing': (uri) => `https://www.bing.com/search?q=${uri}`
-};
 
 // upgrade the url to make it easier for the user:
-//
-// https://www.facebook.com => https://www.facebook.com
-// facebook.com => https://www.facebook.com
-// facebook => https://www.google.com/search?q=facebook
 function upgradeURL(uri, searchEngine = 'google') {
     const isURL = uri.split(' ').length === 1 && uri.includes('.');
     if (isURL) {
@@ -46,9 +33,6 @@ function upgradeURL(uri, searchEngine = 'google') {
         }
         return uri;
     }
-    // search for the text in the search engine
-    const encodedURI = encodeURI(uri);
-    return searchEngines[searchEngine](encodedURI);
 }
 
 // javascript to inject into the window
@@ -58,12 +42,12 @@ const injectedJavaScript = `
 `;
 
 class Browser extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
     }
-    
+
     state = {
-        url: url,
+        url: this.props.url,
         canGoForward: false,
         canGoBack: false,
         incognito: false,
@@ -108,7 +92,6 @@ class Browser extends Component {
         const { config, url } = this.state;
         const { defaultSearchEngine } = config;
         const newURL = upgradeURL(url, defaultSearchEngine);
-
         this.setState({
             url: newURL,
         });
@@ -159,12 +142,17 @@ class Browser extends Component {
 
     // called when the webview is loaded
     onBrowserLoad = (syntheticEvent) => {
-        const { canGoForward, canGoBack, url } = syntheticEvent.nativeEvent;
+        const { canGoForward, canGoBack, url, title } = syntheticEvent.nativeEvent;
         this.setState({
             canGoForward,
             canGoBack,
             url
         })
+
+        this.props.addMetaData(this.props.id,
+            {
+                "title": title
+            })
     };
 
     // called when the navigation state changes (page load)
@@ -211,8 +199,7 @@ class Browser extends Component {
     };
 
     showTabs = () => {
-        this.props.switchCurrOpenWindow('tabs');
-        return
+        this.props.switchCurrOpenWindow(-1);
     }
 
     render() {
@@ -241,6 +228,7 @@ class Browser extends Component {
                     />
                 </View>
 
+                
                 <View style={{ borderTopWidth: 0.5, borderTopColor: '#a9a9a9' }}>
                     <LinearGradient
                         // Button Linear Gradient
@@ -259,12 +247,12 @@ class Browser extends Component {
                                 <Icon name="refresh" size={20} onPress={this.reload} />
                             </View>
                         </View>
-                        
+
                         <View style={styles.layers}>
-                            <Icon name="chevron-left" size={30} onPress={this.goBack} style={{color: canGoBack ? 'black' : 'gray'}} />
+                            <Icon name="chevron-left" size={30} onPress={this.goBack} style={{ color: canGoBack ? 'black' : 'gray' }} disabled={!canGoBack} />
                             <Icon name="export-variant" size={25} onPress={this.onShare} />
-                            <Icon name="checkbox-multiple-blank-outline" size={25} onPress={this.showTabs} style={{transform: [{rotateX: '180deg'}]}} />
-                            <Icon name="chevron-right" size={30} onPress={this.goForward} style={{color: canGoForward ? 'black' : 'gray'}} />
+                            <Icon name="checkbox-multiple-blank-outline" size={25} onPress={this.showTabs} style={{ transform: [{ rotateX: '180deg' }] }} />
+                            <Icon name="chevron-right" size={30} onPress={this.goForward} style={{ color: canGoForward ? 'black' : 'gray' }} disabled={!canGoForward} />
                         </View>
                         {/* <TouchableHighlight onPress={this.loadURL}>
                         <Image
