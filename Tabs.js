@@ -19,16 +19,28 @@ class Tabs extends Component {
             <View style={styles.root}>
                 {(tabCount > 0) && (
                     <View style={styles.tab_count}>
-                        <Text style={{ color: 'white', textAlign: "center" }}>
+                        <Text style={{ color: 'black', textAlign: "center", fontWeight: "bold" }}>
                             {tabCount} {tabCount > 1 ? "Tabs" : "Tab"}
                         </Text>
                     </View>
                 )}
 
                 <ScrollView style={styles.tabContainer}>
-                    {this.props.metadata.map((tab, index) => (
-                        <Text onPress={() => this.props.switchCurrOpenWindow(index)} key={index}>{tab.title}</Text>
-                    ))}
+                    {this.props.metadata.length > 0 ? (
+                        this.props.metadata.map((tab, index) => (
+                            <Text onPress={() => this.props.switchCurrOpenWindow(index)} key={index}>{tab.title}</Text>
+                        )))
+                        :
+                        <View style={styles.centerAligned}>
+                            <Text>
+                                No open tabs
+                            </Text>
+                            <Text>
+                                Click on the <Icon name="plus-circle-outline" size={18} color="#06c" /> icon below to open a new tab.
+                            </Text>
+                        </View>
+                    }
+                    { }
                 </ScrollView>
                 <View style={{ alignItems: "center" }}>
                     <Icon name="plus-circle-outline" size={50} color="#06c" onPress={this.addNewTab} />
@@ -42,9 +54,11 @@ const styles = StyleSheet.create({
     root: {
         flex: 1,
         backgroundColor: '#fff',
+        alignItems: "center",
     },
     tabContainer: {
         flex: 1,
+        padding: 10,
     },
     browserBar: {
         padding: 10,
@@ -53,8 +67,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     tab_count: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderBottomWidth: 1,
+        width: '100%',
         padding: 5,
+        borderBottomColor: '#28282B',
+        marginVertical: 5,
+    },
+    centerAligned: {
+        paddingVertical: 15,
+        alignItems: "center",
     }
 });
 

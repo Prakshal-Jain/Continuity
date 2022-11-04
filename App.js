@@ -13,7 +13,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    this.addNewTab("https://www.google.com");
+    // this.addNewTab("https://www.google.com");
   }
 
   switchCurrOpenWindow = (tabIdx) => {
