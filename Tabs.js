@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 class Tabs extends Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class Tabs extends Component {
                     {this.props.metadata.length > 0 ? (
                         this.props.metadata.map((tab, index) => (
                             <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(index)} key={index} style={styles.tabTitle}>
-                                <Text style={{color: 'white'}}>{tab.title}</Text>
+                                <Text style={{ color: 'white' }}>{tab.title}</Text>
                             </TouchableOpacity>
                         )))
                         :
@@ -44,8 +45,10 @@ class Tabs extends Component {
                     }
                     { }
                 </ScrollView>
-                <View style={{ alignItems: "center" }}>
+                <View style={styles.footer_options}>
+                    <FontAwesome name="gear" size={30} color="#8A8D8F" />
                     <Icon name="plus-circle-outline" size={50} color="#06c" onPress={this.addNewTab} />
+                    <Icon name="delete" size={30} color="#e23838" onPress={this.props.deleteAllTabs} />
                 </View>
             </View>
         )
@@ -86,7 +89,14 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#28282B',
         borderRadius: 10,
-
+        marginVertical: 5,
+    },
+    footer_options: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        width: '100%',
+        paddingHorizontal: 10,
     }
 });
 

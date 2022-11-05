@@ -5,22 +5,18 @@ import {
     View,
     TextInput,
     Keyboard,
-    Image,
-    TouchableHighlight,
     ActivityIndicator,
     Share,
-    RefreshControl,
-    ScrollView
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { captureRef } from "react-native-view-shot";
-import ViewShot from "react-native-view-shot";
+import validUrl from 'valid-url';
 
 // keeps the reference to the browser
 let browserRef = null;
 
+const lodash = require('lodash');
 
 // upgrade the url to make it easier for the user:
 function upgradeURL(uri, searchEngine = 'google') {
@@ -46,7 +42,6 @@ class Browser extends Component {
     }
 
     state = {
-        url: this.props.url,
         canGoForward: false,
         canGoBack: false,
         incognito: false,
@@ -60,6 +55,8 @@ class Browser extends Component {
             defaultSearchEngine: 'google'
         },
         refreshing: false,
+        url: this.props.url,
+        editingURL: this.props.url,
     };
 
 
@@ -89,43 +86,50 @@ class Browser extends Component {
 
     // load the url from the text input
     loadURL = () => {
-        const { config, url } = this.state;
-        const { defaultSearchEngine } = config;
-        const newURL = upgradeURL(url, defaultSearchEngine);
-        this.setState({
-            url: newURL,
-        });
-        Keyboard.dismiss();
+        let sanitized = this.state.editingURL;
+        sanitized = sanitized.toLowerCase();
+        if (!validUrl.isWebUri(sanitized)) {
+            sanitized = `https://www.google.com/search?q=${encodeURIComponent(this.state.editingURL)}`
+        }
+        this.setState({ url: sanitized }, () => {
+            const { config, url } = this.state;
+            const { defaultSearchEngine } = config;
+            const newURL = upgradeURL(url, defaultSearchEngine);
+            this.setState({
+                url: newURL,
+            });
+            Keyboard.dismiss();
+        })
     };
 
     // update the text input
     updateUrlText = (text) => {
         this.setState({
-            url: text
+            editingURL: text
         });
     };
 
 
     // go to the next page
-    goForward = () => {
+    goForward = lodash.debounce(() => {
         if (browserRef && this.state.canGoForward) {
             browserRef.goForward();
         }
-    };
+    });
 
     // go back to the last page
-    goBack = () => {
+    goBack = lodash.debounce(() => {
         if (browserRef && this.state.canGoBack) {
             browserRef.goBack();
         }
-    };
+    });
 
     // reload the page
-    reload = () => {
+    reload = lodash.debounce(() => {
         if (browserRef) {
             browserRef.reload();
         }
-    };
+    }, 1000);
 
     // set the reference for the browser
     setBrowserRef = (browser) => {
@@ -244,12 +248,12 @@ class Browser extends Component {
                             <View style={styles.browserAddressBar}>
                                 <TextInput
                                     onChangeText={this.updateUrlText}
-                                    value={url}
+                                    value={this.state.editingURL}
                                     style={styles.searchBox}
                                     returnKeyType="search"
                                     onSubmitEditing={this.loadURL}
                                 />
-                                <Icon name="refresh" size={20} onPress={this.reload} />
+                                {this.state.refreshing ? <ActivityIndicator size="small" /> : <Icon name="refresh" size={20} onPress={this.reload} />}
                             </View>
                         </View>
 

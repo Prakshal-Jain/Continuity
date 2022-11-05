@@ -27,6 +27,15 @@ export default class App extends React.Component {
     })
   }
 
+  deleteAllTabs = () => {
+    this.setState({
+      currOpenTab: -1,
+      tabs: [],
+      id: 0,
+      metadata: [],
+    })
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.root}>
@@ -40,12 +49,18 @@ export default class App extends React.Component {
           }}
         >
           <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
-          {this.state.tabs.map((tab, index) => (
-            <View style={{ ...styles.browser, display: this.state.currOpenTab === index ? 'block' : 'none' }} key={index}>
-              {tab}
-            </View>
-          ))}
-          {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} /> : null}
+          {this.state.tabs.map((tab, index) => {
+            const display_obj = {}
+            if(this.state.currOpenTab !== index){
+              display_obj['display'] = 'none';
+            }
+            return (
+              <View style={{ ...styles.browser, ...display_obj }} key={index}>
+                {tab}
+              </View>
+            )
+          })}
+          {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} /> : null}
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
