@@ -25,10 +25,12 @@ class Tabs extends Component {
                     </View>
                 )}
 
-                <ScrollView style={styles.tabContainer}>
+                <ScrollView style={styles.tabsContainer}>
                     {this.props.metadata.length > 0 ? (
                         this.props.metadata.map((tab, index) => (
-                            <Text onPress={() => this.props.switchCurrOpenWindow(index)} key={index}>{tab.title}</Text>
+                            <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(index)} key={index} style={styles.tabTitle}>
+                                <Text style={{color: 'white'}}>{tab.title}</Text>
+                            </TouchableOpacity>
                         )))
                         :
                         <View style={styles.centerAligned}>
@@ -56,9 +58,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: "center",
     },
-    tabContainer: {
+    tabsContainer: {
         flex: 1,
         padding: 10,
+        width: '100%',
     },
     browserBar: {
         padding: 10,
@@ -76,6 +79,14 @@ const styles = StyleSheet.create({
     centerAligned: {
         paddingVertical: 15,
         alignItems: "center",
+    },
+    tabTitle: {
+        alignItems: "center",
+        width: '100%',
+        padding: 10,
+        backgroundColor: '#28282B',
+        borderRadius: 10,
+
     }
 });
 

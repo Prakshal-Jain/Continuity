@@ -12,10 +12,6 @@ export default class App extends React.Component {
     metadata: [],
   }
 
-  componentDidMount() {
-    // this.addNewTab("https://www.google.com");
-  }
-
   switchCurrOpenWindow = (tabIdx) => {
     this.setState({ currOpenTab: tabIdx });
   }

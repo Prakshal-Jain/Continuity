@@ -8,12 +8,15 @@ import {
     Image,
     TouchableHighlight,
     ActivityIndicator,
-    Share
+    Share,
+    RefreshControl,
+    ScrollView
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import { captureRef } from "react-native-view-shot";
+import ViewShot from "react-native-view-shot";
 
 // keeps the reference to the browser
 let browserRef = null;
@@ -39,6 +42,7 @@ const injectedJavaScript = `
 class Browser extends Component {
     constructor(props) {
         super(props);
+        this.screenshotRef = React.createRef();
     }
 
     state = {
@@ -54,7 +58,8 @@ class Browser extends Component {
             allowLocation: true,
             allowCaching: true,
             defaultSearchEngine: 'google'
-        }
+        },
+        refreshing: false,
     };
 
 
@@ -143,12 +148,12 @@ class Browser extends Component {
             canGoBack,
             url
         })
-        
-        if(this.props.id > (this.props.metadata.length-1)){
-            this.props.metadata.push({"title": title, "url": url});
+
+        if (this.props.id > (this.props.metadata.length - 1)) {
+            this.props.metadata.push({ "title": title, "url": url });
         }
-        else{
-            this.props.metadata[this.props.id] = {"title": title, "url": url};
+        else {
+            this.props.metadata[this.props.id] = { "title": title, "url": url };
         }
     };
 
@@ -204,12 +209,14 @@ class Browser extends Component {
         const { url, canGoForward, canGoBack, incognito } = state;
         return (
             <View style={styles.root}>
-                <View style={styles.browserContainer}>
+                <View ref={this.screenshotRef} style={styles.browserContainer}>
                     <WebView
                         ref={this.setBrowserRef}
                         originWhitelist={['*']}
                         source={{ uri: url }}
                         onLoad={this.onBrowserLoad}
+                        onLoadStart={() => { this.setState({ refreshing: true }) }}
+                        onLoadEnd={() => { this.setState({ refreshing: false }) }}
                         onError={this.onBrowserError}
                         onNavigationStateChange={this.onNavigationStateChange}
                         renderLoading={() => <ActivityIndicator size="small" color="#ffffff" />}
@@ -222,9 +229,10 @@ class Browser extends Component {
                         geolocationEnabled={config.allowLocation}
                         cacheEnabled={config.allowCaching}
                         injectedJavaScript={injectedJavaScript}
+                        pullToRefreshEnabled={true}
+                        allowsBackForwardNavigationGestures={true}
                     />
                 </View>
-
 
                 <View style={{ borderTopWidth: 0.5, borderTopColor: '#a9a9a9' }}>
                     <LinearGradient
