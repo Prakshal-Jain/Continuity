@@ -11,19 +11,36 @@ export default class DeviceManager extends React.Component {
             tabs: new Map(),
             id: 0,
             metadata: new Map(),
-            device_name: this.props.tabs_data.device_name,
-            device_type: this.props.tabs_data.device_type,
         }
     }
 
     componentDidMount = () => {
-        const metadata_list = Object.entries(this.props.tabs_data.tabs);
-        if (metadata_list.length === 0) {
-            return
-        }
-        const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
-        const id = Number(metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1
-        this.setState({ metadata: new Map(metadata_list), tabs: new Map(tabs), id: id });
+        this.props.socket.emit("get_my_tabs", { "user_id": this.props.credentials.user_id, "device_name": this.props.tabs_data.device_name })
+
+        this.props.socket.on("get_my_tabs", (data) => {
+            const metadata_list = Object.entries(data).map(([key, value]) => [Number(key), value]);
+            const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
+            const id = metadata_list.length === 0 ? 0 : (Number(metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1);
+            this.setState({ metadata: new Map(metadata_list), tabs: new Map(tabs), id: id });
+        })
+
+        this.props.socket.on('add_tab', (data) => {
+            if(data.device_name !== this.props.tabs_data.device_name){
+                return
+            }
+            const metadata_list = Object.entries(data.tabs_data).map(([key, value]) => [Number(key), value]);
+            const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
+            const id = metadata_list.length === 0 ? 0 : (Number(metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1);
+            this.setState({ metadata: new Map([...this.state.metadata, ...metadata_list]), tabs: new Map([...this.state.tabs, tabs]), id: id });
+        });
+
+        // const metadata_list = Object.entries(this.props.tabs_data.tabs);
+        // if (metadata_list.length === 0) {
+        //     return
+        // }
+        // const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
+        // const id = Number(metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1;
+        // this.setState({ metadata: new Map(metadata_list), tabs: new Map(tabs), id: id });
     }
 
     switchCurrOpenWindow = (tabIdx) => {
@@ -39,10 +56,7 @@ export default class DeviceManager extends React.Component {
                 [uniqueID, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} metadata={this.state.metadata} />]
             ])
         }, () => {
-            const bkp = { ...this.props.tabs_data };
-            delete bkp.tabs;
-            delete bkp.device_type;
-            const d = { ...bkp, "tabs_data": { [uniqueID]: { "title": "Google", "url": "https://www.google.com/" } } };
+            const d = { "user_id": this.props.credentials.user_id, "device_name": this.props.tabs_data.device_name, "tabs_data": { [uniqueID]: { "title": "Google", "url": "https://www.google.com/" } } };
             this.props.socket.emit("add_tab", d)
             this.switchCurrOpenWindow(uniqueID);
         })
@@ -90,8 +104,8 @@ export default class DeviceManager extends React.Component {
         return (
             <View>
                 {this.renderTabs()}
-                {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} removeTab={this.removeTab} setCurrentDeviceName={this.props.setCurrentDeviceName} device_name={this.state.device_name} device_type={this.state.device_type} /> : null}
-            </View>
+                {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} removeTab={this.removeTab} setCurrentDeviceName={this.props.setCurrentDeviceName} device_name={this.props.tabs_data.device_name} device_type={this.state.device_type} /> : null}
+            </View >
         );
     }
 }
