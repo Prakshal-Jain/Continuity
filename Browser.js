@@ -56,7 +56,6 @@ class Browser extends Component {
         },
         refreshing: false,
         url: this.props.url,
-        editingURL: this.props.url,
     };
 
 
@@ -86,12 +85,7 @@ class Browser extends Component {
 
     // load the url from the text input
     loadURL = () => {
-        let sanitized = this.state.editingURL;
-        sanitized = sanitized.toLowerCase();
-        if (!validUrl.isWebUri(sanitized)) {
-            sanitized = `https://www.google.com/search?q=${encodeURIComponent(this.state.editingURL)}`
-        }
-        this.setState({ url: sanitized }, () => {
+        this.setState({ url: this.state.url }, () => {
             const { config, url } = this.state;
             const { defaultSearchEngine } = config;
             const newURL = upgradeURL(url, defaultSearchEngine);
@@ -105,7 +99,7 @@ class Browser extends Component {
     // update the text input
     updateUrlText = (text) => {
         this.setState({
-            editingURL: text
+            url: text
         });
     };
 
@@ -154,6 +148,9 @@ class Browser extends Component {
         })
 
         const tab_metadata = { "title": title, "url": url };
+        if (this.props.metadata.has(this.props.id) && (this.props.metadata.get(this.props.id)).url !== url) {
+            this.props.socket.emit("update_tab", { ...this.props.update_tab_data, "tabs_data": { [this.props.id]: tab_metadata } })
+        }
         this.props.metadata.set(this.props.id, tab_metadata);
     };
 
@@ -250,10 +247,11 @@ class Browser extends Component {
                             <View style={styles.browserAddressBar}>
                                 <TextInput
                                     onChangeText={this.updateUrlText}
-                                    value={this.state.editingURL}
+                                    value={this.state.url}
                                     style={styles.searchBox}
                                     returnKeyType="search"
                                     onSubmitEditing={this.loadURL}
+                                    editable={false}
                                 />
                                 {this.state.refreshing ? <ActivityIndicator size="small" /> : <Icon name="refresh" size={20} onPress={this.reload} />}
                             </View>
