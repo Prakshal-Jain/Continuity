@@ -67,6 +67,23 @@ export default class DeviceManager extends React.Component {
                 metadata: new Map(),
             })
         })
+
+        this.props.socket.on('remove_tab', (data) => {
+            if (data.device_name !== this.props.tabs_data.device_name) {
+                return
+            }
+
+            const metadata = this.state.metadata;
+            const tabs = this.state.tabs;
+
+            if (metadata.has(data.id)) {
+                metadata.delete(data.id);
+            }
+            if (tabs.has(data.id)) {
+                tabs.delete(data.id);
+            }
+            this.setState({ metadata: metadata, tabs: tabs });
+        })
     }
 
     switchCurrOpenWindow = (tabIdx) => {
@@ -124,6 +141,7 @@ export default class DeviceManager extends React.Component {
             const newMap = this.state.metadata;
             newMap.delete(id);
             this.setState({ metadata: newMap });
+            this.props.socket.emit("remove_tab", { "user_id": this.props.credentials.user_id, "device_name": this.props.tabs_data.device_name, 'id': id });
         }
     }
 
