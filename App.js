@@ -12,6 +12,7 @@ import {
   StatusBar,
 } from "react-native";
 import Login from './Login';
+import { io } from "socket.io-client";
 
 
 export default class App extends React.Component {
@@ -19,113 +20,41 @@ export default class App extends React.Component {
     devices: [],
     currDeviceName: null,  // null if no devices selected
     isLoggedIn: false,
+    credentials: null,
   }
 
+  socket = io("http://10.84.77.41");
+
   componentDidMount = () => {
-    this.setState({
-      devices: [
-        ...this.state.devices,
-        {
-          "tabs": {
-            0: {
-              "title": "YouTube",
-              "url": "https://youtube.com/"
-            },
-            1: {
-              "title": "LinkedIn",
-              "url": "https://www.linkedin.com/"
-            },
-          },
-          "device_name": "Android Moto G 5G",
-          "device_type": "mobile-phone",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
+    this.socket.on('login', (data) => {
+      if (!data.sucessful) {
+        console.log("Unsuccessful Login");
+        this.setState({ credentials: null });
+        return;
+      }
+      this.setState({ isLoggedIn: true });
+    });
 
-        {
-          "tabs": {
-            0: {
-              "title": "Google Search",
-              "url": "https://www.google.com/"
-            },
-            1: {
-              "title": "LinkedIn",
-              "url": "https://www.linkedin.com/"
-            },
-            2: {
-              "title": "GitHub",
-              "url": "https://github.com/"
-            },
-          },
-          "device_name": "Samsung Tablet",
-          "device_type": "tablet",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
+    this.socket.on('tabs_updated', (data) => {
+      this.setState({
+        devices: data
+      })
+    });
 
-        {
-          "tabs": {
-            0: {
-              "title": "Google Search",
-              "url": "https://www.google.com/"
-            },
-            1: {
-              "title": "LinkedIn",
-              "url": "https://www.linkedin.com/"
-            },
-            2: {
-              "title": "GitHub",
-              "url": "https://github.com/"
-            },
-          },
-          "device_name": "Prakshal's iPad",
-          "device_type": "tablet",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
-        {
-          "tabs": {
-            0: {
-              "title": "Google Search",
-              "url": "https://www.google.com/"
-            },
-            1: {
-              "title": "LinkedIn",
-              "url": "https://www.linkedin.com/"
-            },
-            2: {
-              "title": "GitHub",
-              "url": "https://github.com/"
-            },
-          },
-          "device_name": "Random Desktop",
-          "device_type": "desktop",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
-        {
-          "tabs": {
-            0: {
-              "title": "Google Search",
-              "url": "https://www.google.com/"
-            },
-            1: {
-              "title": "LinkedIn",
-              "url": "https://www.linkedin.com/"
-            },
-            2: {
-              "title": "GitHub",
-              "url": "https://github.com/"
-            },
-          },
-          "device_name": "Lappyyy",
-          "device_type": "laptop",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
+    this.socket.on('add_device', (data) => {
+      this.setState({
+        devices: [
+          ...this.state.devices,
+          data
+        ]
+      })
+    });
 
-        {
-          "tabs": {},
-          "device_name": "New phone",
-          "device_type": "mobile-phone",  // mobile-phone | tablet | laptop | desktop
-          "user_id": "Prakshal"
-        },
-      ]
+  }
+
+  postCredentials = (credentials) => {
+    this.setState({ credentials: credentials }, () => {
+      this.socket.emit("login", credentials);
     });
   }
 
@@ -161,10 +90,10 @@ export default class App extends React.Component {
                 </ScrollView>]
             )
               :
-              <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} />
+              <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} socket={this.socket} credentials={this.state.credentials} />
           )
           :
-          <Login />
+          <Login postCredentials={this.postCredentials} />
         }
       </SafeAreaView>
     );
@@ -208,7 +137,6 @@ const styles = StyleSheet.create({
 
   your_devices: {
     fontSize: 30,
-    fontWeight: 'bold',
     marginBottom: 10,
   }
 });

@@ -18,12 +18,23 @@ export default class DeviceManager extends React.Component {
 
     componentDidMount = () => {
         const metadata_list = Object.entries(this.props.tabs_data.tabs);
-        if(metadata_list.length === 0){
+        if (metadata_list.length === 0) {
             return
         }
-        const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
+        const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} credentials={this.props.credentials} socket={this.props.socket} />])
         const id = (metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1
-        this.setState({metadata: new Map(metadata_list), tabs: new Map(tabs), id: id});
+        this.setState({ metadata: new Map(metadata_list), tabs: new Map(tabs), id: id });
+
+        // this.props.socket.on('add_tab', (data) => {
+        //     // console.log(data.tabs_data.url.tab_metadata)
+        //     // const bkp = this.state.metadata;
+        //     // this.setState({
+        //     //     metadata: new Map([
+        //     //         ...this.state.metadata,
+        //     //         Object.entries(data.tabs_data),
+        //     //     ])
+        //     // })
+        // })
     }
 
     switchCurrOpenWindow = (tabIdx) => {
@@ -36,7 +47,7 @@ export default class DeviceManager extends React.Component {
             id: uniqueID + 1,
             tabs: new Map([
                 ...this.state.tabs,
-                [uniqueID, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} metadata={this.state.metadata} />]
+                [uniqueID, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} metadata={this.state.metadata} socket={this.props.socket} credentials={this.props.credentials} />]
             ])
         }, () => {
             this.switchCurrOpenWindow(uniqueID);

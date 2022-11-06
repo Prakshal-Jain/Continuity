@@ -2,7 +2,7 @@ import { Text, View, StyleSheet, TextInput, Image, Button, Appearance } from 're
 import SelectList from 'react-native-dropdown-select-list'
 import React from "react";
 
-export default function Login() {
+export default function Login(props) {
     const [deviceName, setDeviceName] = React.useState(null);
     const [username, setUsername] = React.useState(null);
     const [selected, setSelected] = React.useState(null);
@@ -28,7 +28,7 @@ export default function Login() {
             <View style={styles.horizontal_flex}>
                 <SelectList setSelected={setSelected} data={data} search={false} />
             </View>
-            <Button style={styles.button} title="Sign Up" color='rgba(27,57,107,255)' onPress={() => {}} />
+            <Button style={styles.button} title="Sign Up" color='rgba(27,57,107,255)' onPress={() => {props.postCredentials({'device_name': deviceName, 'user_id': username, 'device_type': selected})}} />
         </View>
     );
 }
@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     },
     container: {
         alignItems: 'center',
-        justifyContent: 'space',
         padding: 20,
         flex: 1,
         width: '100%'
