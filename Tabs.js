@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 class Tabs extends Component {
     constructor(props) {
@@ -9,13 +10,24 @@ class Tabs extends Component {
     }
 
     addNewTab = () => {
-        const nextIdx = this.props.tabs.length;
         this.props.addNewTab("https://www.google.com");
-        this.props.switchCurrOpenWindow(nextIdx);
+    }
+
+    renderMetadata = () => {
+        const tabs = [];
+        for (const [key, tab] of this.props.metadata) {
+            tabs.push(
+                <View key={key} style={styles.tabTitle}>
+                    <Text style={{ color: 'white', paddingVertical: 15, paddingLeft: 15, flex: 1, marginRight: 5 }} onPress={() => this.props.switchCurrOpenWindow(key)} >{tab.title}</Text>
+                    <FontAwesome name="close" size={20} color="#e23838" style={{ padding: 15 }} onPress={() => this.props.removeTab(key)} />
+                </View>
+            )
+        }
+        return tabs;
     }
 
     render() {
-        const tabCount = this.props.tabs.length;
+        const tabCount = this.props.tabs.size;
         return (
             <View style={styles.root}>
                 {(tabCount > 0) && (
@@ -27,12 +39,8 @@ class Tabs extends Component {
                 )}
 
                 <ScrollView style={styles.tabsContainer}>
-                    {this.props.metadata.length > 0 ? (
-                        this.props.metadata.map((tab, index) => (
-                            <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(index)} key={index} style={styles.tabTitle}>
-                                <Text style={{ color: 'white' }}>{tab.title}</Text>
-                            </TouchableOpacity>
-                        )))
+                    {this.props.metadata.size > 0 ?
+                        this.renderMetadata()
                         :
                         <View style={styles.centerAligned}>
                             <Text>
@@ -43,12 +51,11 @@ class Tabs extends Component {
                             </Text>
                         </View>
                     }
-                    { }
                 </ScrollView>
                 <View style={styles.footer_options}>
-                    <FontAwesome name="gear" size={30} color="#8A8D8F" />
+                    <MaterialIcons name="devices" size={40} color="#28282B" onPress={() => this.props.setCurrentDeviceName(null)} />
                     <Icon name="plus-circle-outline" size={50} color="#06c" onPress={this.addNewTab} />
-                    <Icon name="delete" size={30} color="#e23838" onPress={this.props.deleteAllTabs} />
+                    <Icon name="delete" size={40} color="#e23838" onPress={this.props.deleteAllTabs} />
                 </View>
             </View>
         )
@@ -62,9 +69,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     tabsContainer: {
-        flex: 1,
-        padding: 10,
-        width: '100%',
+        width: Dimensions.get('window').width,
     },
     browserBar: {
         padding: 10,
@@ -77,26 +82,30 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 5,
         borderBottomColor: '#28282B',
-        marginVertical: 5,
+        marginTop: 5,
     },
     centerAligned: {
         paddingVertical: 15,
-        alignItems: "center",
+        alignSelf: "center",
+        alignItems: "center"
     },
     tabTitle: {
         alignItems: "center",
-        width: '100%',
-        padding: 10,
         backgroundColor: '#28282B',
         borderRadius: 10,
         marginVertical: 5,
+        marginHorizontal: 20,
+        flexDirection: "row",
     },
     footer_options: {
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: "space-between",
-        width: '100%',
-        paddingHorizontal: 10,
+        width: Dimensions.get('window').width,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderTopWidth: 0.5,
+        borderTopColor: '#a9a9a9'
     }
 });
 

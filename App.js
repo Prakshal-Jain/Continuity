@@ -1,95 +1,205 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView, View, StatusBar, KeyboardAvoidingView } from 'react-native';
-import Browser from './Browser';
-import Tabs from './Tabs';
+import DeviceManager from './DeviceManager';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  StatusBar,
+} from "react-native";
 
 
 export default class App extends React.Component {
   state = {
-    currOpenTab: -1,
-    tabs: [],
-    id: 0,
-    metadata: [],
+    devices: [],
+    currDeviceName: null,  // null if no devices selected
   }
 
-  switchCurrOpenWindow = (tabIdx) => {
-    this.setState({ currOpenTab: tabIdx });
-  }
-
-  addNewTab = (url) => {
-    const uniqueID = this.state.id;
+  componentDidMount = () => {
     this.setState({
-      id: uniqueID + 1,
-      tabs: [
-        ...this.state.tabs,
-        <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={url} id={uniqueID} key={uniqueID} metadata={this.state.metadata} />
+      devices: [
+        ...this.state.devices,
+        {
+          "tabs": {
+            0: {
+              "title": "YouTube",
+              "url": "https://youtube.com/"
+            },
+            1: {
+              "title": "LinkedIn",
+              "url": "https://www.linkedin.com/"
+            },
+          },
+          "device_name": "Android Moto G 5G",
+          "device_type": "phone",  // phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
+
+        {
+          "tabs": {
+            0: {
+              "title": "Google Search",
+              "url": "https://www.google.com/"
+            },
+            1: {
+              "title": "LinkedIn",
+              "url": "https://www.linkedin.com/"
+            },
+            2: {
+              "title": "GitHub",
+              "url": "https://github.com/"
+            },
+          },
+          "device_name": "Samsung Tablet",
+          "device_type": "tablet",  // phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
+
+        {
+          "tabs": {
+            0: {
+              "title": "Google Search",
+              "url": "https://www.google.com/"
+            },
+            1: {
+              "title": "LinkedIn",
+              "url": "https://www.linkedin.com/"
+            },
+            2: {
+              "title": "GitHub",
+              "url": "https://github.com/"
+            },
+          },
+          "device_name": "Prakshal's iPad",
+          "device_type": "tablet",  // phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
+        {
+          "tabs": {
+            0: {
+              "title": "Google Search",
+              "url": "https://www.google.com/"
+            },
+            1: {
+              "title": "LinkedIn",
+              "url": "https://www.linkedin.com/"
+            },
+            2: {
+              "title": "GitHub",
+              "url": "https://github.com/"
+            },
+          },
+          "device_name": "Random Desktop",
+          "device_type": "desktop",  // phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
+        {
+          "tabs": {
+            0: {
+              "title": "Google Search",
+              "url": "https://www.google.com/"
+            },
+            1: {
+              "title": "LinkedIn",
+              "url": "https://www.linkedin.com/"
+            },
+            2: {
+              "title": "GitHub",
+              "url": "https://github.com/"
+            },
+          },
+          "device_name": "Lappyyy",
+          "device_type": "laptop",  // phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
       ]
-    })
+    });
   }
 
-  deleteAllTabs = () => {
-    this.setState({
-      currOpenTab: -1,
-      tabs: [],
-      id: 0,
-      metadata: [],
-    })
+  iconMap = {
+    "phone": <FontAwesome name="mobile-phone" size={50} color="#28282B" />,
+    "tablet": <FontAwesome name="tablet" size={50} color="#28282B" />,
+    "laptop": <FontAwesome name="laptop" size={50} color="#28282B" />,
+    "desktop": <FontAwesome name="desktop" size={50} color="#28282B" />,
+  }
+
+  setCurrentDeviceName = (name) => {
+    this.setState({ currDeviceName: name });
   }
 
   render() {
     return (
       <SafeAreaView style={styles.root}>
-        <KeyboardAvoidingView
-          {...(Platform.OS === 'ios' ? { behavior: 'padding' } : {})}
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "absolute",
-            zIndex: 1,
-          }}
-        >
-          <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
-          {this.state.tabs.map((tab, index) => {
-            const display_obj = {}
-            if(this.state.currOpenTab !== index){
-              display_obj['display'] = 'none';
+        <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
+        {this.state.currDeviceName === null ? (
+          [<Text style={styles.your_devices} key="page_label">Your Devices</Text>,
+          <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
+            {
+              this.state.devices.map((x => (
+                <TouchableOpacity key={x.device_name} style={styles.device_box} onPress={() => this.setCurrentDeviceName(x.device_name)}>
+                  <View style={styles.icon_style}>
+                    {this.iconMap[x.device_type]}
+                  </View>
+
+                  <View>
+                    <Text style={{ textAlign: 'center' }}>
+                      {x.device_name}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )))
             }
-            return (
-              <View style={{ ...styles.browser, ...display_obj }} key={index}>
-                {tab}
-              </View>
-            )
-          })}
-          {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} /> : null}
-        </KeyboardAvoidingView>
+          </ScrollView>]
+        )
+          :
+          <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} />
+        }
       </SafeAreaView>
     );
   }
 }
 
+
 const styles = StyleSheet.create({
-  browser: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  header: {
-    height: 65,
-    paddingTop: 25,
-    justifyContent: 'center',
-  },
-  headerText: {
-    fontSize: 20
-  },
   root: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    display: 'flex'
+    display: 'flex',
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
-  display_browser: {
-    display: 'block',
+
+  devices_container: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 15,
+    justifyContent: 'center',
+    paddingBottom: 50,
   },
-  hide_browser: {
-    display: 'hide',
+
+  device_box: {
+    width: 150,
+    height: 150,
+    borderWidth: 1,
+    borderColor: '#28282B',
+    margin: 15,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+
+  icon_style: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  your_devices: {
+    fontSize: 30,
+    fontWeight: 'bold',
   }
 });

@@ -7,6 +7,7 @@ import {
     Keyboard,
     ActivityIndicator,
     Share,
+    KeyboardAvoidingView
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,7 +39,6 @@ const injectedJavaScript = `
 class Browser extends Component {
     constructor(props) {
         super(props);
-        this.screenshotRef = React.createRef();
     }
 
     state = {
@@ -153,12 +153,7 @@ class Browser extends Component {
             url
         })
 
-        if (this.props.id > (this.props.metadata.length - 1)) {
-            this.props.metadata.push({ "title": title, "url": url });
-        }
-        else {
-            this.props.metadata[this.props.id] = { "title": title, "url": url };
-        }
+        this.props.metadata.set(this.props.id, { "title": title, "url": url });
     };
 
     // called when the navigation state changes (page load)
@@ -212,8 +207,14 @@ class Browser extends Component {
         const { config, state } = this;
         const { url, canGoForward, canGoBack, incognito } = state;
         return (
-            <View style={styles.root}>
-                <View ref={this.screenshotRef} style={styles.browserContainer}>
+            <KeyboardAvoidingView
+                {...(Platform.OS === 'ios' ? { behavior: 'padding' } : {})}
+                style={{
+                    width: "100%",
+                    ...styles.root
+                }}
+            >
+                <View style={styles.browserContainer}>
                     <WebView
                         ref={this.setBrowserRef}
                         originWhitelist={['*']}
@@ -263,38 +264,15 @@ class Browser extends Component {
                             <Icon name="checkbox-multiple-blank-outline" size={25} onPress={this.showTabs} style={{ transform: [{ rotateX: '180deg' }] }} />
                             <Icon name="chevron-right" size={30} onPress={this.goForward} style={{ color: canGoForward ? 'black' : '#D3D3D3' }} disabled={!canGoForward} />
                         </View>
-                        {/* <TouchableHighlight onPress={this.loadURL}>
-                        <Image
-                            style={styles.icon}
-                            source={webIcon} />
-                    </TouchableHighlight>
 
-                    <TouchableHighlight onPress={this.goBack}>
-                        <Image
-                            style={[styles.icon, canGoBack ? {} : styles.disabled]}
-                            source={arrowBackIcon} />
-                    </TouchableHighlight>
-
-                    <TouchableHighlight onPress={this.goForward}>
-                        <Image
-                            style={[styles.icon, canGoForward ? {} : styles.disabled]}
-                            source={arrowNextIcon} />
-                    </TouchableHighlight>
-
-                    <TouchableHighlight onPress={this.reload}>
-                        <Image
-                            style={styles.icon}
-                            source={refreshIcon} />
-                    </TouchableHighlight>
-
-                    <TouchableHighlight onPress={this.toggleIncognito}>
-                        <Image
-                            style={[styles.icon, incognito ? {} : styles.disabled]}
-                            source={incognitoIcon} />
-                    </TouchableHighlight> */}
+                        {/* <TouchableHighlight onPress={this.toggleIncognito}>
+                                <Image
+                                    style={[styles.icon, incognito ? {} : styles.disabled]}
+                                    source={incognitoIcon} />
+                            </TouchableHighlight> */}
                     </LinearGradient>
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         );
     }
 }
@@ -304,7 +282,6 @@ const styles = StyleSheet.create({
         flex: 1
     },
     root: {
-        flex: 1,
         backgroundColor: '#FAFAFA',
     },
     icon: {
@@ -338,7 +315,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         justifyContent: "space-between",
-        borderWidth: 0,
         padding: 12,
         borderWidth: 0.1,
         borderColor: '#171717',
