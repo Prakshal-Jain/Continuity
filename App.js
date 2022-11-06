@@ -50,6 +50,25 @@ export default class App extends React.Component {
       })
     });
 
+
+    this.socket.on('add_tab', (data) => {
+      const idx = (this.state.devices.findIndex(device => device.device_name === data.device_name));
+      const d = this.state.devices;
+
+      d[idx].tabs = {
+        ...d[idx].tabs,
+        ...data.tabs_data
+      }
+
+      const curr = this.state.currDeviceName;
+      this.setState({currDeviceName: null}, () => {
+        this.setState({currDeviceName: curr});
+      });
+
+      this.setState({
+          devices: d,
+      })
+    });
   }
 
   postCredentials = (credentials) => {
@@ -90,7 +109,7 @@ export default class App extends React.Component {
                 </ScrollView>]
             )
               :
-              <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} socket={this.socket} credentials={this.state.credentials} />
+              <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} socket={this.socket} />
           )
           :
           <Login postCredentials={this.postCredentials} />

@@ -154,8 +154,6 @@ class Browser extends Component {
         })
 
         const tab_metadata = { "title": title, "url": url };
-        // console.log({ ...this.props.credentials, 'tabs_data': { [this.props.id]: tab_metadata } })
-        // this.props.socket.emit("add_tab", { ...this.props.credentials, 'tabs_data': { [this.props.id]: tab_metadata } })
         this.props.metadata.set(this.props.id, tab_metadata);
     };
 
