@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView, View, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Browser from './Browser';
 import Tabs from './Tabs';
 
@@ -11,7 +11,19 @@ export default class DeviceManager extends React.Component {
             tabs: new Map(),
             id: 0,
             metadata: new Map(),
+            device_name: this.props.tabs_data.device_name,
+            device_type: this.props.tabs_data.device_type,
         }
+    }
+
+    componentDidMount = () => {
+        const metadata_list = Object.entries(this.props.tabs_data.tabs);
+        if(metadata_list.length === 0){
+            return
+        }
+        const tabs = metadata_list.map(([key, metadata]) => [key, <Browser switchCurrOpenWindow={this.switchCurrOpenWindow} url={metadata.url} id={key} key={key} metadata={this.state.metadata} />])
+        const id = (metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1
+        this.setState({metadata: new Map(metadata_list), tabs: new Map(tabs), id: id});
     }
 
     switchCurrOpenWindow = (tabIdx) => {
@@ -73,7 +85,7 @@ export default class DeviceManager extends React.Component {
         return (
             <View>
                 {this.renderTabs()}
-                {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} removeTab={this.removeTab} setCurrentDeviceName={this.props.setCurrentDeviceName} /> : null}
+                {this.state.currOpenTab === -1 ? <Tabs tabs={this.state.tabs} addNewTab={this.addNewTab} switchCurrOpenWindow={this.switchCurrOpenWindow} metadata={this.state.metadata} deleteAllTabs={this.deleteAllTabs} removeTab={this.removeTab} setCurrentDeviceName={this.props.setCurrentDeviceName} device_name={this.state.device_name} device_type={this.state.device_type} /> : null}
             </View>
         );
     }

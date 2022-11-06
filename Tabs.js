@@ -32,6 +32,7 @@ class Tabs extends Component {
             <View style={styles.root}>
                 {(tabCount > 0) && (
                     <View style={styles.tab_count}>
+                        <Text style={{ color: 'black', textAlign: "center" }}>{this.props.device_name} <FontAwesome name={this.props.device_type} size={18} color="#28282B" /></Text>
                         <Text style={{ color: 'black', textAlign: "center", fontWeight: "bold" }}>
                             {tabCount} {tabCount > 1 ? "Tabs" : "Tab"}
                         </Text>
@@ -44,7 +45,7 @@ class Tabs extends Component {
                         :
                         <View style={styles.centerAligned}>
                             <Text>
-                                No open tabs
+                                No open tabs on <Text style={{ fontWeight: "bold" }}>{this.props.device_name}</Text> <FontAwesome name={this.props.device_type} size={18} color="#28282B" />
                             </Text>
                             <Text>
                                 Click on the <Icon name="plus-circle-outline" size={18} color="#06c" /> icon below to open a new tab.
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     tabsContainer: {
+        paddingVertical: 10,
         width: Dimensions.get('window').width,
     },
     browserBar: {

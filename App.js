@@ -35,7 +35,7 @@ export default class App extends React.Component {
             },
           },
           "device_name": "Android Moto G 5G",
-          "device_type": "phone",  // phone | tablet | laptop | desktop
+          "device_type": "mobile-phone",  // mobile-phone | tablet | laptop | desktop
           "user_id": "Prakshal"
         },
 
@@ -55,7 +55,7 @@ export default class App extends React.Component {
             },
           },
           "device_name": "Samsung Tablet",
-          "device_type": "tablet",  // phone | tablet | laptop | desktop
+          "device_type": "tablet",  // mobile-phone | tablet | laptop | desktop
           "user_id": "Prakshal"
         },
 
@@ -75,7 +75,7 @@ export default class App extends React.Component {
             },
           },
           "device_name": "Prakshal's iPad",
-          "device_type": "tablet",  // phone | tablet | laptop | desktop
+          "device_type": "tablet",  // mobile-phone | tablet | laptop | desktop
           "user_id": "Prakshal"
         },
         {
@@ -94,7 +94,7 @@ export default class App extends React.Component {
             },
           },
           "device_name": "Random Desktop",
-          "device_type": "desktop",  // phone | tablet | laptop | desktop
+          "device_type": "desktop",  // mobile-phone | tablet | laptop | desktop
           "user_id": "Prakshal"
         },
         {
@@ -113,18 +113,18 @@ export default class App extends React.Component {
             },
           },
           "device_name": "Lappyyy",
-          "device_type": "laptop",  // phone | tablet | laptop | desktop
+          "device_type": "laptop",  // mobile-phone | tablet | laptop | desktop
+          "user_id": "Prakshal"
+        },
+
+        {
+          "tabs": {},
+          "device_name": "New phone",
+          "device_type": "mobile-phone",  // mobile-phone | tablet | laptop | desktop
           "user_id": "Prakshal"
         },
       ]
     });
-  }
-
-  iconMap = {
-    "phone": <FontAwesome name="mobile-phone" size={50} color="#28282B" />,
-    "tablet": <FontAwesome name="tablet" size={50} color="#28282B" />,
-    "laptop": <FontAwesome name="laptop" size={50} color="#28282B" />,
-    "desktop": <FontAwesome name="desktop" size={50} color="#28282B" />,
   }
 
   setCurrentDeviceName = (name) => {
@@ -136,27 +136,28 @@ export default class App extends React.Component {
       <SafeAreaView style={styles.root}>
         <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
         {this.state.currDeviceName === null ? (
-          [<Text style={styles.your_devices} key="page_label">Your Devices</Text>,
-          <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
-            {
-              this.state.devices.map((x => (
-                <TouchableOpacity key={x.device_name} style={styles.device_box} onPress={() => this.setCurrentDeviceName(x.device_name)}>
-                  <View style={styles.icon_style}>
-                    {this.iconMap[x.device_type]}
-                  </View>
+          [
+            <View style={{ borderBottomColor: '#a9a9a9', borderBottomWidth: 1, width: '100%', alignItems: 'center' }} key="page_label"><Text style={styles.your_devices}>Your Devices</Text></View>,
+            <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
+              {
+                this.state.devices.map((x => (
+                  <TouchableOpacity key={x.device_name} style={styles.device_box} onPress={() => this.setCurrentDeviceName(x.device_name)}>
+                    <View style={styles.icon_style}>
+                      <FontAwesome name={x.device_type} size={50} color="#28282B" />
+                    </View>
 
-                  <View>
-                    <Text style={{ textAlign: 'center' }}>
-                      {x.device_name}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              )))
-            }
-          </ScrollView>]
+                    <View>
+                      <Text style={{ textAlign: 'center' }}>
+                        {x.device_name}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )))
+              }
+            </ScrollView>]
         )
           :
-          <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} />
+          <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} />
         }
       </SafeAreaView>
     );
@@ -201,5 +202,6 @@ const styles = StyleSheet.create({
   your_devices: {
     fontSize: 30,
     fontWeight: 'bold',
+    marginBottom: 10,
   }
 });

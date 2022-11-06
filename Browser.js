@@ -111,25 +111,25 @@ class Browser extends Component {
 
 
     // go to the next page
-    goForward = lodash.debounce(() => {
+    goForward = lodash.throttle(() => {
         if (browserRef && this.state.canGoForward) {
             browserRef.goForward();
         }
-    });
+    }, 500);
 
     // go back to the last page
-    goBack = lodash.debounce(() => {
+    goBack = lodash.throttle(() => {
         if (browserRef && this.state.canGoBack) {
             browserRef.goBack();
         }
-    });
+    }, 500);
 
     // reload the page
-    reload = lodash.debounce(() => {
+    reload = lodash.throttle(() => {
         if (browserRef) {
             browserRef.reload();
         }
-    }, 1000);
+    }, 500);
 
     // set the reference for the browser
     setBrowserRef = (browser) => {
@@ -211,7 +211,7 @@ class Browser extends Component {
                 {...(Platform.OS === 'ios' ? { behavior: 'padding' } : {})}
                 style={{
                     width: "100%",
-                    ...styles.root
+                    ...styles.root,
                 }}
             >
                 <View style={styles.browserContainer}>
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     root: {
-        backgroundColor: '#FAFAFA',
+        backgroundColor: '#fff',
     },
     icon: {
         width: 30,
@@ -297,6 +297,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'column',
         paddingHorizontal: 15,
+        marginBottom: 10,
     },
     layers: {
         flexDirection: 'row',
