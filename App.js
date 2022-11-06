@@ -11,12 +11,14 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
+import Login from './Login';
 
 
 export default class App extends React.Component {
   state = {
     devices: [],
     currDeviceName: null,  // null if no devices selected
+    isLoggedIn: false,
   }
 
   componentDidMount = () => {
@@ -135,29 +137,34 @@ export default class App extends React.Component {
     return (
       <SafeAreaView style={styles.root}>
         <StatusBar animated={true} barStyle="dark-content" backgroundColor="#fff" />
-        {this.state.currDeviceName === null ? (
-          [
-            <View style={{ borderBottomColor: '#a9a9a9', borderBottomWidth: 1, width: '100%', alignItems: 'center' }} key="page_label"><Text style={styles.your_devices}>Your Devices</Text></View>,
-            <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
-              {
-                this.state.devices.map((x => (
-                  <TouchableOpacity key={x.device_name} style={styles.device_box} onPress={() => this.setCurrentDeviceName(x.device_name)}>
-                    <View style={styles.icon_style}>
-                      <FontAwesome name={x.device_type} size={50} color="#28282B" />
-                    </View>
+        {this.state.isLoggedIn ?
+          (
+            this.state.currDeviceName === null ? (
+              [
+                <View style={{ borderBottomColor: '#a9a9a9', borderBottomWidth: 1, width: '100%', alignItems: 'center' }} key="page_label"><Text style={styles.your_devices}>Your Devices</Text></View>,
+                <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
+                  {
+                    this.state.devices.map((x => (
+                      <TouchableOpacity key={x.device_name} style={styles.device_box} onPress={() => this.setCurrentDeviceName(x.device_name)}>
+                        <View style={styles.icon_style}>
+                          <FontAwesome name={x.device_type} size={50} color="#28282B" />
+                        </View>
 
-                    <View>
-                      <Text style={{ textAlign: 'center' }}>
-                        {x.device_name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )))
-              }
-            </ScrollView>]
-        )
+                        <View>
+                          <Text style={{ textAlign: 'center' }}>
+                            {x.device_name}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    )))
+                  }
+                </ScrollView>]
+            )
+              :
+              <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} />
+          )
           :
-          <DeviceManager setCurrentDeviceName={this.setCurrentDeviceName} tabs_data={(this.state.devices.filter(device => device.device_name === this.state.currDeviceName))[0]} />
+          <Login />
         }
       </SafeAreaView>
     );
