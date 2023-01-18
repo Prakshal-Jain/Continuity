@@ -13,3 +13,7 @@ services:
       FLASK_APP: backend/server.py
     # ports:
     #   - '80:8000'
+  website:
+    build: ./website
+    # ports:
+    #   - '3000:3000'
