@@ -2,7 +2,7 @@ import "./websocket.js";
 import { render_login_page, render_loading_page } from "./pages.js";
 import { throttle } from "./utilities.js";
 
-const socket = io.connect("https://continuitybrowser.com");
+const socket = io.connect("https://continuitybrowser.com/api");
 let all_devices = [];
 let target_device = null;
 let target_device_type = null;

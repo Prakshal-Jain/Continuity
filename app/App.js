@@ -25,7 +25,7 @@ import Report from './Report';
 import Notifications from './Notifications';
 
 const Stack = createStackNavigator();
-const socket = io("https://continuitybrowser.com");
+const socket = io("https://continuitybrowser.com/api");
 
 
 export default function () {

@@ -11,31 +11,27 @@ app.config["SECRET_KEY"] = "secret!"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-@app.route("/extension_device_details")
+@app.route("/api/extension_device_details")
 def extension_device_details():
     return render_template("extension_device_details.html")
 
 
-@app.route("/syncing_devices")
+@app.route("/api/syncing_devices")
 def syncing_devices():
     return render_template("syncing_devices.html")
 
 
-@app.route("/")
-def temp_website():
-    return render_template("temp_website.html")
-
-@app.route("/testing")
+@app.route("/api/testing")
 def index():
     return render_template("test.html", device_name="Dell_" + str(randint(0, 10)))
 
 
-@app.route("/admin")
+@app.route("/api/admin")
 def admin():
     return render_template("admin.html")
 
 
-@app.route("/assets/<path:path>")
+@app.route("/api/assets/<path:path>")
 def assets(path):
     return send_from_directory("assets", path)
 

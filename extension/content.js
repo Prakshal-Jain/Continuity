@@ -1,4 +1,4 @@
-const socket = io.connect("https://continuitybrowser.com");
+const socket = io.connect("https://continuitybrowser.com/api");
 
 let buffer = [];
 

@@ -58,7 +58,7 @@
 // Privacy tracker --> TODO
 
 
-const EXTENSION_DEVICE_DETAILS_PAGE = 'https://continuitybrowser.com/extension_device_details';
+const EXTENSION_DEVICE_DETAILS_PAGE = 'https://continuitybrowser.com/api/extension_device_details';
 
 
 function generateRandomIntegerInRange(min, max) {
