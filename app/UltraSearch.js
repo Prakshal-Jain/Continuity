@@ -102,7 +102,7 @@ class UltraSearch extends Component {
             }
         })
 
-        this?.context?.socket.on("payment", (data) => {
+        this?.context?.socket.on("payment_intent", (data) => {
             if (data?.successful === true) {
                 this.setState({ payment_params: data?.message })
             }
@@ -118,7 +118,7 @@ class UltraSearch extends Component {
         });
 
 
-        this?.context?.socket.emit('payment', {
+        this?.context?.socket.emit('payment_intent', {
             user_id: this?.context?.credentials?.user_id,
             device_name: this?.context?.credentials?.device_name,
             device_token: this?.context?.credentials?.device_token,
