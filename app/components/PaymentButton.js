@@ -71,7 +71,7 @@ export default function PaymentButton({ style, onPressEvent, text, paymentParams
         }
         else {
             setReady(true);
-            onPressEvent();
+            // onPressEvent();
         }
     }
 

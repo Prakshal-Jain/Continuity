@@ -102,17 +102,17 @@ class UltraSearch extends Component {
             }
         })
 
-        this?.context?.socket.on("payment", (data) => {
+        this?.context?.socket.on("payment_intent", (data) => {
             if (data?.successful === true) {
                 this.setState({ payment_params: data?.message })
             }
             else {
-                this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search", "Settings"]) });
+                this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search"]) });
             }
         });
 
 
-        this?.context?.socket.emit('payment', {
+        this?.context?.socket.emit('payment_intent', {
             user_id: this?.context?.credentials?.user_id,
             device_name: this?.context?.credentials?.device_name,
             device_token: this?.context?.credentials?.device_token,

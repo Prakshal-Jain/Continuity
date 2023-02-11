@@ -30,8 +30,8 @@ import Tutorial from './Tutorial';
 import { privacy_domain_set } from "./utilities/list";
 
 const Stack = createStackNavigator();
-const socket = io("https://continuitybrowser.com");
-// const socket = io("https://10.3.12.22");
+// const socket = io("https://continuitybrowser.com");
+const socket = io("https://10.3.12.22");
 
 
 export default function () {
