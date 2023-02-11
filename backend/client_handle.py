@@ -549,7 +549,9 @@ class ClientHandleNamespace(Namespace):
         if not self.__authenticate_device("payment", user, data):
             return
 
-        bundle_dict = {'essentials': {'price': 499, 'product_id': 'price_1MZaXtAuOsRyx3wnAFmKLvj5'}, 'supported':{'price': 999, 'product_id':'price_1MZaZ1AuOsRyx3wnhHcO7wiV'}}
+        bundle_dict = {
+            'essentials_monthly': {'price': 499, 'product_id': 'price_1MZaXtAuOsRyx3wnAFmKLvj5'}, 
+            'professional_monthly':{'price': 999, 'product_id':'price_1MZaZ1AuOsRyx3wnhHcO7wiV'}}
         bundle = data.get("bundle")
         user_id = data.get("user_id")
         currency = data.get("currency", "usd")

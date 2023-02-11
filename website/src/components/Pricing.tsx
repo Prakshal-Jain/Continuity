@@ -51,7 +51,7 @@ export default function Pricing() {
                     <div style={{ color: 'rgb(0, 122, 255)' }}>Most Popular</div>
                     <h2 style={{ marginTop: '1rem', marginBottom: '1rem' }}>Essentials</h2>
                     <button className={styles.buy_btn} style={{ background: 'rgb(0, 122, 255)' }}>Start Free Trial</button>
-                    <div className={styles.price_tag}>7 days free, then just {isMonthly ? <span style={{fontSize: 'large'}}>$4.99/month</span> : <span><del>$59.88</del>{' '}<span style={{fontSize: 'large'}}>$49.88/year</span></span>}.</div>
+                    <div className={styles.price_tag}>7 days free, then just {isMonthly ? <span style={{fontSize: 'large'}}>$4.99/month</span> : <span><del>$59.88</del>{' '}<span style={{fontSize: 'large'}}>$49.99/year</span></span>}.</div>
                     <AvailableFeatures featureList={essentials} />
                 </div>
                 <div className={styles.price_card}>
