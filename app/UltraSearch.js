@@ -102,7 +102,7 @@ class UltraSearch extends Component {
             }
         })
 
-        this?.context?.socket.on("payment_intent", (data) => {
+        this?.context?.socket.on("payment", (data) => {
             if (data?.successful === true) {
                 this.setState({ payment_params: data?.message })
             }
@@ -111,8 +111,14 @@ class UltraSearch extends Component {
             }
         });
 
+        this?.context?.socket.on("payment_successful", (data) => {
+            if (data?.successful !== true) {
+                this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search"]) });
+            }
+        });
 
-        this?.context?.socket.emit('payment_intent', {
+
+        this?.context?.socket.emit('payment', {
             user_id: this?.context?.credentials?.user_id,
             device_name: this?.context?.credentials?.device_name,
             device_token: this?.context?.credentials?.device_token,
@@ -133,16 +139,6 @@ class UltraSearch extends Component {
         }
     }, 500, { trailing: false });
 
-
-    upgradeHelper = () => {
-        this?.context?.socket.emit('enroll_feature', {
-            user_id: this?.context?.credentials?.user_id,
-            device_name: this?.context?.credentials?.device_name,
-            device_token: this?.context?.credentials?.device_token,
-            feature_name: "ultra_search",
-            is_enrolled: this?.context?.credentials?.enrolled_features?.ultra_search?.enrolled
-        })
-    }
 
     upgradeUltraSearch = () => {
         if (this?.context?.credentials?.enrolled_features?.ultra_search?.enrolled === true) {
@@ -165,9 +161,6 @@ class UltraSearch extends Component {
                 ]
             )
         }
-        else {
-            this.upgradeHelper();
-        }
     }
 
 
@@ -184,7 +177,6 @@ class UltraSearch extends Component {
                         (
                             <PaymentButton
                                 style={[styles.upgradeBtn, { backgroundColor: this.state.payment_params ? 'rgba(255, 149, 0, 1)' : 'rgba(255, 149, 0, 0.7)' }]}
-                                onPressEvent={this.upgradeUltraSearch}
                                 paymentParams={this.state.payment_params}
                                 text={
                                     <Text style={styles.upgradeText}>Upgrade to Essentials Bundle</Text>

@@ -551,7 +551,11 @@ class ClientHandleNamespace(Namespace):
 
         bundle_dict = {
             'essentials_monthly': {'price': 499, 'product_id': 'price_1MZaXtAuOsRyx3wnAFmKLvj5'}, 
-            'professional_monthly':{'price': 999, 'product_id':'price_1MZaZ1AuOsRyx3wnhHcO7wiV'}}
+            'professional_monthly':{'price': 999, 'product_id':'price_1MZaZ1AuOsRyx3wnhHcO7wiV'},
+            'essentials_yearly':{'price': 4999, 'product_id':'price_1MaB1EAuOsRyx3wna06jGgNu'},
+            'professional_yearly':{'price': 9999, 'product_id':'price_1MaB01AuOsRyx3wnKyajlniZ'},
+        }
+
         bundle = data.get("bundle")
         user_id = data.get("user_id")
         currency = data.get("currency", "usd")
