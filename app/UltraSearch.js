@@ -4,7 +4,7 @@ import {
     Text,
     StyleSheet,
     SafeAreaView,
-    StatusBar,
+    ActivityIndicator,
     View,
     TouchableOpacity,
     Alert,
@@ -14,6 +14,8 @@ import { StateContext } from "./state_context";
 import { throttle } from 'lodash';
 import * as Haptics from 'expo-haptics';
 import UnifiedError from "./components/UnifiedError";
+import * as Localization from 'expo-localization';
+import PaymentButton from "./components/PaymentButton";
 
 
 const styles = StyleSheet.create({
@@ -43,9 +45,11 @@ const styles = StyleSheet.create({
         marginRight: 40,
         marginLeft: 40,
         marginVertical: 15,
-        paddingVertical: 10,
-        backgroundColor: 'rgba(255, 149, 0, 1)',
+        padding: 10,
+        alignItems: "center",
         borderRadius: 10,
+        flexDirection: "row",
+        justifyContent: "center",
     },
 
     upgradeText: {
@@ -80,17 +84,40 @@ class UltraSearch extends Component {
     static contextType = StateContext;
     constructor(props) {
         super(props);
+
+        this.state = {
+            sub_time: 'monthly',
+            payment_params: null
+        }
     }
 
     componentDidMount = () => {
         this?.context?.socket.on("enroll_feature", (data) => {
-            if (data?.successful) {
+            if (data?.successful === true) {
                 this.onNavPop();
                 this?.context?.setCredentials(data?.message);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search", "Settings"]) });
             }
+        })
+
+        this?.context?.socket.on("payment", (data) => {
+            if (data?.successful === true) {
+                this.setState({ payment_params: data?.message })
+            }
+            else {
+                this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search", "Settings"]) });
+            }
+        });
+
+
+        this?.context?.socket.emit('payment', {
+            user_id: this?.context?.credentials?.user_id,
+            device_name: this?.context?.credentials?.device_name,
+            device_token: this?.context?.credentials?.device_token,
+            currency: Localization?.currency ?? 'USD',
+            bundle: `essentials_${this.state.sub_time}`
         })
     }
 
@@ -118,10 +145,6 @@ class UltraSearch extends Component {
     }
 
     upgradeUltraSearch = () => {
-        if (this?.context?.button_haptics !== 'none') {
-            Haptics.impactAsync(this?.context?.button_haptics);
-        }
-
         if (this?.context?.credentials?.enrolled_features?.ultra_search?.enrolled === true) {
             Alert.alert(
                 "Are you sure you wish to unenroll?",
@@ -159,12 +182,14 @@ class UltraSearch extends Component {
 
                     {(this?.context?.credentials?.enrolled_features?.ultra_search?.enrolled === false) &&
                         (
-                            <TouchableOpacity
-                                style={styles.upgradeBtn}
-                                onPress={this.upgradeUltraSearch}
-                                underlayColor='#fff'>
-                                <Text style={styles.upgradeText}>Upgrade to Ultra Search</Text>
-                            </TouchableOpacity>
+                            <PaymentButton
+                                style={[styles.upgradeBtn, { backgroundColor: this.state.payment_params ? 'rgba(255, 149, 0, 1)' : 'rgba(255, 149, 0, 0.7)' }]}
+                                onPressEvent={this.upgradeUltraSearch}
+                                paymentParams={this.state.payment_params}
+                                text={
+                                    <Text style={styles.upgradeText}>Upgrade to Essentials Bundle</Text>
+                                }
+                            />
                         )
                     }
 

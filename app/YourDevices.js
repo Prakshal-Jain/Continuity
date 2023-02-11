@@ -50,7 +50,7 @@ class YourDevices extends Component {
                 }
                 else {
                     const user_id = await storage.get("user_id");
-                    this?.context?.setError({ message: `A verification link has been sent to your email:\n${user_id}. \n\nPlease check for it and follow the instructions to verify your account.`, type: "warning", displayPages: new Set(["Login"]) });
+                    this?.context?.setError({ message: `A verification link has been sent to your email:\n${user_id}. \n\nPlease check for the email and follow the instructions to verify your account. \n\nMake sure to check your Spam folder if you cannot find the email in your inbox.`, type: "warning", displayPages: new Set(["Login"]) });
                     this.navigation.navigate('Login');
                 }
             }
