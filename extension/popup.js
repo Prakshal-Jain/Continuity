@@ -229,7 +229,7 @@ function setup_devices_page() {
     tutorial_icon.setAttribute('title', 'Device setup tutorial');
     tutorial_icon.onclick = () => {
         chrome.storage.local.get(['device_name', 'user_id'], function (result) {
-            window.open(`http://continuitybrowser.com/sync_tutorial/?email=${result?.user_id}&device_name=${result?.device_name}`, '_blank');
+            window.open(`http://continuitybrowser.com/sync_tutorial?email=${result?.user_id}&device_name=${result?.device_name}`, '_blank');
         })
     }
     tutorial_icon.style.color = 'rgba(40, 205, 65, 1)';
@@ -541,7 +541,7 @@ const render_setup_tutorial = () => {
     get_started.classList.add('start_tutorial');
     get_started.onclick = () => {
         chrome.storage.local.get(['device_name', 'user_id'], function (result) {
-            window.open(`http://continuitybrowser.com/sync_tutorial/?email=${result?.user_id}&device_name=${result?.device_name}`, '_blank');
+            window.open(`http://continuitybrowser.com/sync_tutorial?email=${result?.user_id}&device_name=${result?.device_name}`, '_blank');
         })
     }
     padded_container.appendChild(get_started);

@@ -27,6 +27,7 @@ import * as Haptics from 'expo-haptics';
 import Report from './Report';
 import Notifications from './Notifications';
 import Tutorial from './Tutorial';
+import MoreOptions from './MoreOptions';
 import { privacy_domain_set } from "./utilities/list";
 
 const Stack = createStackNavigator();
@@ -147,6 +148,10 @@ export default function () {
 
           <Stack.Screen name="Tutorial" component={Tutorial}
             options={{ ...headerOptions, headerLeft: null, headerRight: null }}
+          />
+
+          <Stack.Screen name="More Options" component={MoreOptions}
+            options={{ ...headerOptions, presentation: 'modal', title: "Bookmarks" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

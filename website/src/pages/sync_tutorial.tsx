@@ -24,13 +24,14 @@ export default function SyncTutorial() {
     const [deviceName, setDeviceName] = useState<string | string[] | null>(null);
 
     useEffect(() => {
+        console.log(router?.query);
         if (router?.query?.email !== null && router?.query?.email !== undefined && router?.query?.email?.length > 0) {
             setEmail(router?.query?.email)
         };
         if (router?.query?.device_name !== null && router?.query?.device_name !== undefined) {
             setDeviceName(router?.query?.device_name)
         };
-    }, [])
+    }, [router?.query])
 
     const steps = [
         {
@@ -62,6 +63,15 @@ export default function SyncTutorial() {
                             </div>
                         </div>
                     </div>
+
+                    <div className={styles.divided_section}>
+                        Or, watch our <b>Device Setup Tutorial</b> video on YouTube
+
+                        <div style={{ marginTop: 20 }}>
+                            <iframe className={styles.video} src="https://www.youtube.com/embed/rRPC211SAIM" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                        </div>
+                    </div>
+
                 </>
             ),
 
@@ -377,6 +387,12 @@ export default function SyncTutorial() {
                 <>
                     <div className={styles.heading}>Setup your Chrome Extension</div>
                     <div className={styles.larger_text}>Enter the <span style={{ fontWeight: "bold" }}>Device Name</span> and <span style={{ fontWeight: "bold" }}>Device Type</span>.</div>
+                    {(deviceName !== null && deviceName !== undefined) && (
+                        <>
+                            <div className={styles.larger_text} style={{ marginTop: '0.5rem' }}>For example:</div>
+                            <div className={`${styles.larger_text} ${styles.border_container}`}>{deviceName + ' Extension'}</div>
+                        </>
+                    )}
                     <div className={styles.larger_text}>Then, click on <span style={{ fontWeight: "bold" }}>Get Started</span> button.</div>
                     <Image
                         src={chromeExtension6}

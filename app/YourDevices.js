@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
     StyleSheet,
     Text,
@@ -140,6 +141,24 @@ class YourDevices extends Component {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Your Devices"]) });
             }
         });
+
+
+        this.props?.navigation.setOptions({
+            headerRight: () => (
+                <Pressable
+                    onPress={() => {
+                        if (this?.context?.button_haptics !== 'none') {
+                            Haptics.impactAsync(this?.context?.button_haptics);
+                        }
+                        this.navigation.navigate('Help');
+                    }}
+                    hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
+                    style={{ marginRight: 20 }}
+                >
+                    <MaterialIcons name="help-outline" size={28} color={this?.context?.colorScheme === 'dark' ? '#fff' : '#000'} />
+                </Pressable>
+            )
+        })
     }
 
     autoAuthenticate = async () => {
@@ -200,11 +219,11 @@ class YourDevices extends Component {
                                         if (this?.context?.button_haptics !== 'none') {
                                             Haptics.impactAsync(this?.context?.button_haptics);
                                         }
-                                        this.navigation.navigate('Help');
+                                        this.navigation.navigate('More Options');
                                     }}
                                     hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
                                 >
-                                    <MaterialIcons name="help-outline" size={35} color={this?.context?.colorScheme === 'dark' ? '#fff' : '#000'} />
+                                    <Icon name="dots-grid" size={35} color={this?.context?.colorScheme === 'dark' ? '#fff' : '#000'} />
                                 </Pressable>
 
                                 <Pressable

@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "com.continuity",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/small-logo-light.png",
         "backgroundColor": "#1c1c1e"
