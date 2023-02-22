@@ -142,6 +142,9 @@ export default function Login({ navigation, route }) {
                             placeholderTextColor={colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)'}
                             onChangeText={setUserId}
                             key="email"
+                            autoCapitalize='none'
+                            autoCorrect={false}
+                            keyboardType='email-address'
                         />
                     </View>
                     {/* <View style={styles.horizontal_flex}>

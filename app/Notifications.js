@@ -43,7 +43,8 @@ class Notifications extends Component {
     componentDidMount = () => {
         this?.context?.socket.on('get_notification', (data) => {
             if (data?.successful === true) {
-                this.setState({ notifications: data?.message, loading: false })
+                this.setState({ notifications: data?.message, loading: false });
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Notifications"]) });
@@ -54,6 +55,9 @@ class Notifications extends Component {
         this?.context?.socket.on('ack_notification', (data) => {
             if (data?.successful !== true) {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Notifications"]) });
+            }
+            else {
+                this?.context?.setError(null);
             }
         });
 

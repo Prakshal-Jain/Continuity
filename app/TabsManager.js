@@ -35,6 +35,7 @@ class TabsManager extends React.Component {
                         this.addNewTab(this.props?.route?.params?.url);
                     }
                 });
+                this?.context?.setError(null);
             }
             else {
                 this.setState({ loading: false }, () => {
@@ -60,7 +61,8 @@ class TabsManager extends React.Component {
                 this.setState({
                     metadata: metadata,
                     id: id,
-                })
+                });
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -88,6 +90,7 @@ class TabsManager extends React.Component {
                     tabs_backup.delete(idx);
                     this.setState({ tabs: tabs_backup });
                 }
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -106,6 +109,7 @@ class TabsManager extends React.Component {
                     id: 0,
                     metadata: new Map(),
                 })
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -134,6 +138,7 @@ class TabsManager extends React.Component {
                 }
 
                 this.setState({ metadata: metadata, tabs: tabs });
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });

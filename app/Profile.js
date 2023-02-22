@@ -45,6 +45,7 @@ export default function ({ navigation, route, ...props }) {
                 setTrackerCounts(data?.message?.tracker_counts);
                 setTrackers(data?.message?.trackers);
                 setWebsites(data?.message?.websites);
+                setError(null);
             }
             else {
                 setError({ message: data?.message, type: data?.type, displayPages: new Set(["Profile"]) });
@@ -55,6 +56,7 @@ export default function ({ navigation, route, ...props }) {
         socket.on("logout", (data) => {
             if (data?.successful === true) {
                 deleteAllData();
+                setError(null);
             }
             else {
                 setError({ message: data?.message, type: data?.type, displayPages: new Set(["Profile"]) });
@@ -64,6 +66,7 @@ export default function ({ navigation, route, ...props }) {
         socket.on("delete_user", (data) => {
             if (data?.successful === true) {
                 deleteAllData();
+                setError(null);
 
             }
             else {

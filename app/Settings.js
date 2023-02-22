@@ -31,6 +31,7 @@ function Settings({ navigation, route }) {
         socket.on("switch_feature", (data) => {
             if (data?.successful) {
                 setCredentials(data?.message);
+                setError(null);
             }
             else {
                 setError({ message: data?.message, type: data?.type, displayPages: new Set(["Settings"]) });

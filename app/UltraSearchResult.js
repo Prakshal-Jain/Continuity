@@ -79,6 +79,7 @@ class UltraSearchResult extends Component {
         this?.context?.socket.on('ultra_search_query', (data) => {
             if (data?.successful === true) {
                 this.setState({ ultra_search_response: data?.message?.response, ultra_search_prompt: data?.message?.prompt })
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Ultra Search Results"]) });

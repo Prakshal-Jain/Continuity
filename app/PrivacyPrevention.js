@@ -87,6 +87,7 @@ class PrivacyPrevention extends Component {
             if (data?.successful === true) {
                 this.onNavPop();
                 this?.context?.setCredentials(data?.message);
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Privacy Prevention", "Settings"]) });

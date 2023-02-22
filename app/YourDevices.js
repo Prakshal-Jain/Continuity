@@ -50,14 +50,13 @@ class YourDevices extends Component {
                 }
                 else {
                     const user_id = await storage.get("user_id");
-                    this?.context?.setError({ message: `A verification link has been sent to your email:\n${user_id}. \n\nPlease check for it and follow the instructions to verify your account.`, type: "warning", displayPages: new Set(["Login"]) });
+                    this?.context?.setError({ message: `A verification link has been sent to your email:\n${user_id}. \n\nPlease check for it and follow the instructions to verify your account. \n\nMake sure to check your Spam folder if you cannot find the email in your inbox.`, type: "warning", displayPages: new Set(["Login"]) });
                     this.navigation.navigate('Login');
                 }
             }
             else {
                 this?.context?.setCredentials(null);
                 this?.context?.setLoginCurrStep(1);
-                // this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Login"]) });
                 this.navigation.navigate('Login');
             }
         })
@@ -112,6 +111,7 @@ class YourDevices extends Component {
         this?.context?.socket.on('all_devices', (data) => {
             if (data?.successful === true) {
                 this?.context?.setDevices(data?.message);
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Your Devices"]) });
@@ -126,6 +126,7 @@ class YourDevices extends Component {
                     data?.message
                 ];
                 this?.context?.setDevices(all_dev);
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Your Devices"]) });
@@ -134,7 +135,8 @@ class YourDevices extends Component {
 
         this?.context?.socket.on('notification_count', (data) => {
             if (data?.successful === true) {
-                this.setState({ notification_count: data?.message?.notification_count })
+                this.setState({ notification_count: data?.message?.notification_count });
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Your Devices"]) });

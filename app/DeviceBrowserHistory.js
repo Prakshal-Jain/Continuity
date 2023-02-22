@@ -58,6 +58,7 @@ class DeviceBrowserHistory extends Component {
                         this.setState({ history: newHist });
                     }
                 }
+                this?.context?.setError(null);
             }
             else {
                 this.setState({ isNext: false });
@@ -85,6 +86,7 @@ class DeviceBrowserHistory extends Component {
 
                     this.setState({ history: newHist });
                 }
+                this?.context?.setError(null);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Search History"]) });
