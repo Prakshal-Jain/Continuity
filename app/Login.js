@@ -23,18 +23,19 @@ export default function Login({ navigation, route }) {
     const [password, setPassword] = useState(null);
 
     useEffect(() => {
-        const subscription = AppState.addEventListener('change', async (nextAppState) => {
-            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                const id = await storage.get('user_id') ?? credentials?.user_id;
-                socket.emit('sign_in', { user_id: id });
-                console.log('App has come to the foreground!');
-            }
-            appState.current = nextAppState;
-        });
+        if (loginCurrStep === 1) {
+            const subscription = AppState.addEventListener('change', async (nextAppState) => {
+                if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                    const id = await storage.get('user_id') ?? credentials?.user_id;
+                    socket.emit('sign_in', { user_id: id });
+                }
+                appState.current = nextAppState;
+            });
 
-        return () => {
-            subscription.remove();
-        };
+            return () => {
+                subscription.remove();
+            };
+        }
     }, []);
 
     const postCredentials = async () => {
