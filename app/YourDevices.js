@@ -41,6 +41,7 @@ class YourDevices extends Component {
         // }, 10000);
 
         this?.context?.socket.on('sign_in', async (data) => {
+            console.log(data);
             // clearTimeout(timeoutId);
 
             if (data?.successful === true) {

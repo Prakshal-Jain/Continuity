@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TextInput, Image, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TextInput, Image, SafeAreaView, ScrollView, TouchableOpacity, AppState } from 'react-native';
 import React, { useContext, useState } from "react";
 import CheckBoxList from './components/CheckBoxList';
 import logoDark from "./assets/logo-dark.png";
@@ -9,14 +9,33 @@ import ProgressBar from "./components/ProgressBar";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import CustomText from './components/CustomText';
 import storage from "./utilities/storage";
+import { useRef } from 'react';
+import { useEffect } from 'react';
 
 export default function Login({ navigation, route }) {
     const { socket, colorScheme, credentials, loginCurrStep, setLoginCurrStep } = useContext(StateContext);
+    const appState = useRef(AppState.currentState);
+
     const [deviceName, setDeviceName] = useState(null);
     const [selected, setSelected] = useState('mobile-phone');
 
     const [user_id, setUserId] = useState(null);
     const [password, setPassword] = useState(null);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', async (nextAppState) => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                const id = await storage.get('user_id') ?? credentials?.user_id;
+                socket.emit('sign_in', { user_id: id });
+                console.log('App has come to the foreground!');
+            }
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
 
     const postCredentials = async () => {
         const id = await storage.get('user_id') ?? credentials?.user_id;
