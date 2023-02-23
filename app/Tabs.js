@@ -23,6 +23,8 @@ class Tabs extends Component {
         }
     }
 
+    scrollRef = React.createRef();
+
     componentDidUpdate = () => {
         const tabCount = this.tabCounter(this.props.isIncognitoView);
         this.props?.navigation.setOptions({
@@ -79,22 +81,25 @@ class Tabs extends Component {
                     <Text style={{ marginLeft: 5, fontWeight: "bold", textAlign: "center", color: this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)', fontSize: 20 }}>Incognito Mode</Text>
                 </View>
             )}
-            <View style={[styles.searchBar, { backgroundColor: (this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? 'rgba(58, 58, 60, 1)' : 'rgba(229, 229, 234, 1)' }]}>
-                <View style={{ flexDirection: 'row', justifyContent: "space-between", alignItems: "center" }}>
-                    <FontAwesome name="search" style={{ fontSize: 18 }} color={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(229, 229, 234, 1)" : "rgba(44, 44, 46, 1)"} />
-                    <TextInput
-                        onChangeText={this.onSearch}
-                        style={[styles.searchBox, { color: (this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? '#fff' : '#000' }]}
-                        placeholder="Search Tabs"
-                        value={this.state.searchQuery}
-                        placeholderTextColor={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(174, 174, 178, 1)" : "rgba(72, 72, 74, 1)"}
-                        selectTextOnFocus={true}
-                    />
-                    {this.state.searchQuery.length > 0 && (
-                        <Icon name="close-circle-outline" size={18} color={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(229, 229, 234, 1)" : "rgba(44, 44, 46, 1)"} onPress={() => { this.setState({ searchQuery: "" }) }} />
-                    )}
+
+            {this.tabCounter(this.props.isIncognitoView) > 5 && (
+                <View style={[styles.searchBar, { backgroundColor: (this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? 'rgba(58, 58, 60, 1)' : 'rgba(229, 229, 234, 1)' }]}>
+                    <View style={{ flexDirection: 'row', justifyContent: "space-between", alignItems: "center" }}>
+                        <FontAwesome name="search" style={{ fontSize: 18 }} color={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(229, 229, 234, 1)" : "rgba(44, 44, 46, 1)"} />
+                        <TextInput
+                            onChangeText={this.onSearch}
+                            style={[styles.searchBox, { color: (this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? '#fff' : '#000' }]}
+                            placeholder="Search Tabs"
+                            value={this.state.searchQuery}
+                            placeholderTextColor={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(174, 174, 178, 1)" : "rgba(72, 72, 74, 1)"}
+                            selectTextOnFocus={true}
+                        />
+                        {this.state.searchQuery.length > 0 && (
+                            <Icon name="close-circle-outline" size={18} color={(this.props.isIncognitoView || this?.context?.colorScheme === 'dark') ? "rgba(229, 229, 234, 1)" : "rgba(44, 44, 46, 1)"} onPress={() => { this.setState({ searchQuery: "" }) }} />
+                        )}
+                    </View>
                 </View>
-            </View>
+            )}
 
             <UnifiedError currentPage={this.props?.route_name} />
 
@@ -194,7 +199,10 @@ class Tabs extends Component {
                         refreshing={this.props.loading}
                         onRefresh={this.props.refreshTabs}
                     />
-                }>
+                }
+                    ref={this.scrollRef}
+                    onContentSizeChange={() => { this.scrollRef?.current?.scrollToEnd({ animated: false }); }}
+                >
                     {this.props.loading === true ?
                         (
                             <Loader message="Fetching your tabs like a good doggo..." showActivityIndicator={false} />
