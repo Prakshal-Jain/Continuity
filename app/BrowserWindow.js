@@ -191,9 +191,31 @@ export default function (props) {
     }
 
     const onBrowserLoad = (syntheticEvent) => {
-        const { canGoForward, canGoBack } = syntheticEvent.nativeEvent;
+        const { canGoForward, canGoBack, title } = syntheticEvent.nativeEvent;
         setIsFirstRequest(true);
 
+        const curr_url = syntheticEvent?.nativeEvent?.url;
+
+        let parsedUrl;
+
+        try {
+            parsedUrl = new URL(curr_url);
+        }
+        catch (err) {
+            parsedUrl = null;
+        }
+
+        if (parsedUrl?.hostname === 'www.google.com' && parsedUrl?.pathname === '/search') {
+            // Extract the searched string from the q query parameter
+            const prompt = parsedUrl?.searchParams.get('q');
+            if (prompt !== undefined && prompt !== null && ultraSearchPrompt !== prompt) {
+                // A new prompt from user
+                setUltraSearchPrompt(parsedUrl?.searchParams.get('q') ?? title)
+            }
+        }
+        else {
+            setUltraSearchPrompt(title);
+        }
 
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
@@ -240,8 +262,11 @@ export default function (props) {
                 const prompt = parsedUrl?.searchParams.get('q');
                 if (prompt !== undefined && prompt !== null && ultraSearchPrompt !== prompt) {
                     // A new prompt from user
-                    setUltraSearchPrompt(parsedUrl?.searchParams.get('q'))
+                    setUltraSearchPrompt(parsedUrl?.searchParams.get('q') ?? title)
                 }
+            }
+            else {
+                setUltraSearchPrompt(title);
             }
         }
 

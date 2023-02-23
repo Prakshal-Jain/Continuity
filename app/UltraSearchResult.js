@@ -17,6 +17,7 @@ import * as Clipboard from 'expo-clipboard';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Loader from "./components/Loader";
 import UnifiedError from "./components/UnifiedError";
+import AlertMessage from './components/AlertMessage';
 
 class UltraSearchResult extends Component {
     static contextType = StateContext;
@@ -139,7 +140,10 @@ class UltraSearchResult extends Component {
                                     (
                                         (this.state.loading) &&
                                         (
-                                            <Loader message="Hunting for the ultimate solutions for you..." />
+                                            <View style={{ margin: 20 }}>
+                                                <Loader message="Hunting for the ultimate solutions for you..." />
+                                                <AlertMessage type="message" message="Due to a high volume of traffic on the OpenAI API, users may experience slow results from Ultra Search. We are actively working to resolve this issue as quickly as possible and apologize for any inconvenience this may cause." />
+                                            </View>
                                         )
                                     )
                                 )
