@@ -1,11 +1,12 @@
 import 'react-native-gesture-handler';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import Profile from "./Profile";
 import Help from "./Help";
 import {
   useColorScheme,
+  Platform
 } from "react-native";
 import PrivacyPolicy from './PrivacyPolicy';
 import Settings from './Settings';
@@ -61,7 +62,7 @@ export default function () {
     })();
   }, []);
 
-  const headerOptions = {
+  const headerOptionsSlideFromRight = {
     headerStyle: {
       backgroundColor: (colorScheme === 'dark') ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)',
     },
@@ -69,6 +70,19 @@ export default function () {
     headerTitleStyle: {
       fontWeight: 'bold',
     },
+    ...(Platform.OS === 'ios' ? {} : TransitionPresets.SlideFromRightIOS),
+  }
+
+  const headerOptionsModalSlideFromBottomIOS = {
+    headerStyle: {
+      backgroundColor: (colorScheme === 'dark') ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)',
+    },
+    headerTintColor: (colorScheme === 'dark') ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+    presentation: 'modal',
+    ...(Platform.OS === 'ios' ? {} : TransitionPresets.ModalSlideFromBottomIOS),
   }
 
   return (
@@ -78,7 +92,7 @@ export default function () {
           <Stack.Screen
             name="Your Devices"
             component={YourDevices}
-            options={{ ...headerOptions, headerShown: (credentials !== null && credentials !== undefined) }}
+            options={{ ...headerOptionsSlideFromRight, headerShown: (credentials !== null && credentials !== undefined) }}
           />
 
           <Stack.Screen
@@ -92,61 +106,57 @@ export default function () {
           />
 
           <Stack.Screen name="Profile" component={Profile}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
           <Stack.Screen name="Help" component={Help}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
           <Stack.Screen name="Privacy Policy" component={PrivacyPolicy}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Settings" component={Settings}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Ultra Search" component={UltraSearch}
-            options={{ ...headerOptions, presentation: 'modal' }}
+            options={headerOptionsModalSlideFromBottomIOS}
           />
 
           <Stack.Screen name="Privacy Prevention" component={PrivacyPrevention}
-            options={{ ...headerOptions, presentation: 'modal' }}
+            options={headerOptionsModalSlideFromBottomIOS}
           />
 
           <Stack.Screen name="Ultra Search Results" component={UltraSearchResult}
-            options={{ ...headerOptions, presentation: 'modal' }}
+            options={headerOptionsModalSlideFromBottomIOS}
           />
 
           <Stack.Screen name="Ultra Search | Terms of Use and Disclaimer" component={TermsDisclaimerUltraSearch}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Trackers Contacted" component={TrackersContacted}
-            options={{ ...headerOptions, presentation: 'modal' }}
+            options={headerOptionsModalSlideFromBottomIOS}
           />
 
           <Stack.Screen name="Search History" component={DeviceBrowserHistory}
-            options={headerOptions}
-          />
-
-          <Stack.Screen name="Browser" component={BrowserWindow}
-            options={{ presentation: 'containedModal', headerShown: false }}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Tabs" component={TabsManager}
-            options={{ ...headerOptions, gestureEnabled: canGoBackToYourDevices, headerLeft: null, headerRight: null, headerShown: canGoBackToYourDevices }}
+            options={{ ...headerOptionsSlideFromRight, gestureEnabled: canGoBackToYourDevices, headerLeft: null, headerRight: null, headerShown: canGoBackToYourDevices }}
           />
 
           <Stack.Screen name="Report" component={Report}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Notifications" component={Notifications}
-            options={headerOptions}
+            options={headerOptionsSlideFromRight}
           />
 
           <Stack.Screen name="Tutorial" component={Tutorial}
-            options={{ ...headerOptions, headerLeft: null, headerRight: null }}
+            options={{ ...headerOptionsSlideFromRight, headerLeft: null, headerRight: null }}
           />
         </Stack.Navigator>
       </NavigationContainer>
