@@ -74,7 +74,7 @@ class Tabs extends Component {
 
     renderSearchWithTabs = (tabs) => (
         <View>
-            <Text style={{ color: (this?.context?.colorScheme === 'dark') ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)', textAlign: "center" }}>Pull to sync tabs with other devices</Text>
+            <Text style={{ color: (this?.context?.colorScheme === 'dark') ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)', textAlign: "center", marginBottom: 10 }}>Pull to sync tabs with other devices</Text>
             {this.props.isIncognitoView && (
                 <View style={{ paddingTop: 15, flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
                     <Icon name="incognito-circle" size={35} color={this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)'} onPress={() => this.props.setIsIncognitoView(true)} />
@@ -263,28 +263,31 @@ class Tabs extends Component {
                     </Pressable>
 
                     <Pressable
+                        disabled={tabCount <= 0}
                         onPress={() => {
-                            if (this?.context?.button_haptics !== 'none') {
-                                Haptics.impactAsync(this?.context?.button_haptics);
+                            if (tabCount > 0) {
+                                if (this?.context?.button_haptics !== 'none') {
+                                    Haptics.impactAsync(this?.context?.button_haptics);
+                                }
+                                Alert.alert(
+                                    "Are you sure you want to delete all the tabs?",
+                                    null,
+                                    [
+                                        {
+                                            text: "Cancel",
+                                            onPress: () => { }
+                                        },
+                                        {
+                                            text: "Delete",
+                                            onPress: this.props.deleteAllTabs
+                                        },
+                                    ]
+                                )
                             }
-                            Alert.alert(
-                                "Are you sure you want to delete all the tabs?",
-                                null,
-                                [
-                                    {
-                                        text: "Cancel",
-                                        onPress: () => { }
-                                    },
-                                    {
-                                        text: "Delete",
-                                        onPress: this.props.deleteAllTabs
-                                    },
-                                ]
-                            )
                         }}
                         hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
                     >
-                        <Icon style={{ padding: 10 }} name="delete" size={30} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} />
+                        <Icon style={{ padding: 10 }} name="delete" size={30} color={this?.context?.colorScheme === 'dark' ? `rgba(255, 55, 95, ${(tabCount > 0) ? 1 : 0.3})` : `rgba(255, 45, 85, ${(tabCount > 0) ? 1 : 0.3})`} />
                     </Pressable>
                 </View>
             </View >

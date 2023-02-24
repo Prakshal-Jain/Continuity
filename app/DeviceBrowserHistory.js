@@ -8,6 +8,7 @@ import {
     FlatList,
     Image,
     TouchableOpacity,
+    Alert
 } from "react-native";
 import { StateContext } from "./state_context";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -109,14 +110,29 @@ class DeviceBrowserHistory extends Component {
 
 
     deleteAllHistory = () => {
-        this?.context?.socket.emit('delete_history', {
-            'user_id': this?.context?.credentials?.user_id,
-            'device_name': this?.context?.credentials?.device_name,
-            'device_token': this?.context?.credentials?.device_token,
-            'target_device': this.state.target_device,
-            id: null,
-            is_delete_all: true,
-        })
+        Alert.alert(
+            "Are you sure you want to delete all your browsing history?",
+            null,
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => { }
+                },
+                {
+                    text: "Delete",
+                    onPress: () => {
+                        this?.context?.socket.emit('delete_history', {
+                            'user_id': this?.context?.credentials?.user_id,
+                            'device_name': this?.context?.credentials?.device_name,
+                            'device_token': this?.context?.credentials?.device_token,
+                            'target_device': this.state.target_device,
+                            id: null,
+                            is_delete_all: true,
+                        })
+                    }
+                },
+            ]
+        )
     }
 
     deleteOneHistory = (id, array_index, item_index) => {
@@ -198,12 +214,14 @@ class DeviceBrowserHistory extends Component {
                     />
                 </View>
 
-                <View style={this.styles.footer_options}>
-                    <TouchableOpacity style={[this.styles.deleteAllButtonContainer, { borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)' }]} onPress={this.deleteAllHistory}>
-                        <Icon style={{ marginRight: 10 }} name="delete" size={20} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} />
-                        <Text style={[this.styles.deleteAllText, { color: this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)' }]}>Clear Browsing History</Text>
-                    </TouchableOpacity>
-                </View>
+                {this.state.history && this.state.history?.length > 0 && (
+                    <View style={this.styles.footer_options}>
+                        <TouchableOpacity style={[this.styles.deleteAllButtonContainer, { borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)' }]} onPress={this.deleteAllHistory}>
+                            <Icon style={{ marginRight: 10 }} name="delete" size={20} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} />
+                            <Text style={[this.styles.deleteAllText, { color: this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)' }]}>Clear Browsing History</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </SafeAreaView>
         );
     }
