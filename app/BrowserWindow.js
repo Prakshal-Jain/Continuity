@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { View, TextInput, SafeAreaView, StatusBar, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text } from "react-native";
+import { View, TextInput, Alert, Linking, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { StateContext } from "./state_context";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -281,45 +281,89 @@ export default function (props) {
         }
     }
 
-    const onShouldStartLoadWithRequest = (request) => {
-        let returnBool = true;
-        if (!isFirstRequest) {
-            if (!incognito) {
-                const parsedUrl = new URL(request.url);
-                if (!(parsedUrl.hostname === 'www.google.com' && parsedUrl.pathname === '/search')) {
-                    const websiteHost = (new URL(url))?.hostname;
-                    const tracker = parsedUrl?.hostname;
-                    const trackerHost = extractDomain(tracker);
+    function verifyUrlType(url) {
 
-                    if (trackerHost !== null && trackerHost !== undefined && trackerHost !== '' && (!websiteHost.includes(trackerHost)) && websiteHost !== 'www.google.com' && trackerHost !== 'www.google.com') {
-                        socket?.emit('report_privacy_trackers', {
-                            'user_id': credentials?.user_id,
-                            'device_name': credentials?.device_name,
-                            "device_token": credentials?.device_token,
-                            target_device,
-                            "website_host": websiteHost,
-                            "tracker": trackerHost
-                        })
-                        if (privacy_domain_set.has(trackerHost)) {
-                            returnBool = false;
+        // short circuit these
+        if (!url ||
+            url.startsWith('http') ||
+            url.startsWith("/") ||
+            url.startsWith("#") ||
+            url.startsWith("javascript") ||
+            url.startsWith("about:blank")
+        ) {
+            return true;
+        }
+
+        // blocked blobs
+        if (url.startsWith("blob")) {
+            Alert.alert("Link cannot be opened.");
+            return false;
+        }
+
+        // list of schemas we will allow the webview
+        // to open natively
+        if (url.startsWith("tel:") ||
+            url.startsWith("mailto:") ||
+            url.startsWith("maps:") ||
+            url.startsWith("geo:") ||
+            url.startsWith("sms:")
+        ) {
+
+            Linking.openURL(url).catch(er => {
+                Alert.alert("Failed to open Link: " + er.message);
+            });
+            return false;
+        }
+
+        // let everything else to the webview
+        return true;
+    }
+
+    const onShouldStartLoadWithRequest = (request) => {
+
+        if (verifyUrlType(request?.url)) {
+            let returnBool = true;
+            if (!isFirstRequest) {
+                if (!incognito) {
+                    const parsedUrl = new URL(request.url);
+                    if (!(parsedUrl.hostname === 'www.google.com' && parsedUrl.pathname === '/search')) {
+                        const websiteHost = (new URL(url))?.hostname;
+                        const tracker = parsedUrl?.hostname;
+                        const trackerHost = extractDomain(tracker);
+
+                        if (trackerHost !== null && trackerHost !== undefined && trackerHost !== '' && (!websiteHost.includes(trackerHost)) && websiteHost !== 'www.google.com' && trackerHost !== 'www.google.com') {
+                            socket?.emit('report_privacy_trackers', {
+                                'user_id': credentials?.user_id,
+                                'device_name': credentials?.device_name,
+                                "device_token": credentials?.device_token,
+                                target_device,
+                                "website_host": websiteHost,
+                                "tracker": trackerHost
+                            })
+                            if (privacy_domain_set.has(trackerHost)) {
+                                returnBool = false;
+                            }
                         }
                     }
                 }
             }
-        }
-        else {
-            setIsFirstRequest(false);
-        }
-        // can prevent requests from fulfilling, good to log requests
-        // or filter ads and adult content.
+            else {
+                setIsFirstRequest(false);
+            }
+            // can prevent requests from fulfilling, good to log requests
+            // or filter ads and adult content.
 
-        // MUST return true for the request to pass through
-        if ((credentials?.enrolled_features?.privacy_prevention?.enrolled === true) && (credentials?.enrolled_features?.privacy_prevention?.switch === true)) {
-            // Filter and do not allow trackers when enrolled and switch in privacy_prevention
-            return returnBool;
+            // MUST return true for the request to pass through
+            if ((credentials?.enrolled_features?.privacy_prevention?.enrolled === true) && (credentials?.enrolled_features?.privacy_prevention?.switch === true)) {
+                // Filter and do not allow trackers when enrolled and switch in privacy_prevention
+                return returnBool;
+            }
+            else {
+                return true;
+            }
         }
         else {
-            return true;
+            return false
         }
     }
 

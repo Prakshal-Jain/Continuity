@@ -184,12 +184,11 @@ class DeviceBrowserHistory extends Component {
                             </View>
                         )}
                         onEndReached={this.getHistory}
-                        onEndReachedThreshold={10}
+                        onEndReachedThreshold={0.5}
                         ListHeaderComponent={
                             <View style={{ alignItems: "center", marginBottom: 20, paddingHorizontal: 15 }}>
-                                <Text style={[this.styles.heading, { color: this?.context?.colorScheme === 'dark' ? '#fff' : '#000' }]}>Search History</Text>
                                 {/* <MaterialCommunityIcons name="history" style={{ fontSize: 30 }}  /> */}
-                                <View style={{ flexDirection: "row" }}>
+                                <View style={{ flexDirection: "row", paddingTop: 15 }}>
                                     <FontAwesome name={this.state.device_type} size={30} color={this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)'} />
                                     <Text style={[this.styles.subheading, { color: this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)' }]}>{this.state.target_device}</Text>
                                 </View>
