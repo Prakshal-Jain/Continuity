@@ -165,36 +165,74 @@ class YourDevices extends Component {
                 {(this?.context?.credentials !== null && this?.context?.credentials !== undefined) ?
                     (
                         <>
-                            <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={styles.devices_container}>
+                            <ScrollView key="device_list" style={{ width: '100%' }} contentContainerStyle={{ padding: 15, paddingBottom: 50, alignItems: 'center' }}>
                                 <UnifiedError currentPage={this.props?.route?.name} />
-                                {
-                                    this?.context?.devices.map(((x, i) => (
-                                        <ScaleTouchableOpacity
-                                            key={x.device_name}
-                                            style={{ ...styles.device_box, borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)' }}
-                                            onPress={() => {
-                                                this?.context?.setCurrentDeviceName(x.device_name);
-                                                this.navigation.navigate('Tabs')
-                                            }}
-                                            key={`device_${i}`}
-                                        >
-                                            <View style={styles.icon_style}>
-                                                <FontAwesome name={x.device_type} size={50} color={this?.context?.colorScheme === 'dark' ? '#fff' : '#000'} />
-                                            </View>
 
-                                            <View>
-                                                <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? '#fff' : '#000' }}>
-                                                    {x.device_name}
-                                                </Text>
-                                                {x.device_name === this?.context?.credentials.device_name && (
-                                                    <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
-                                                        <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
+                                {this?.context?.credentials && (
+                                    <ScaleTouchableOpacity
+                                        style={{
+                                            ...styles.device_box,
+                                            width: 170,
+                                            height: 170,
+                                            borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(209, 209, 214, 1)' : 'rgba(58, 58, 60, 1)',
+                                            backgroundColor: this?.context?.colorScheme === 'dark' ? 'rgba(44, 44, 46, 1)' : 'rgba(229, 229, 234, 1)',
+                                        }}
+                                        onPress={() => {
+                                            this?.context?.setCurrentDeviceName(this?.context?.credentials?.device_name);
+                                            this.navigation.navigate('Tabs')
+                                        }}
+                                        key={`device_current_device`}
+                                    >
+                                        <View style={styles.icon_style}>
+                                            <FontAwesome name={this?.context?.credentials?.device_type} size={50} color={this?.context?.colorScheme === 'dark' ? '#fff' : '#000'} />
+                                        </View>
+
+                                        <View>
+                                            <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? '#fff' : '#000' }}>
+                                                {this?.context?.credentials?.device_name}
+                                            </Text>
+                                            <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
+                                                <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
+                                            </Text>
+                                        </View>
+                                    </ScaleTouchableOpacity>
+                                )}
+
+                                <View
+                                    style={{
+                                        marginVertical: 15,
+                                    }}
+                                />
+
+                                <View style={styles.devices_container}>
+                                    {
+                                        this?.context?.devices?.filter(x => x.device_name !== this?.context?.credentials.device_name).map(((x, i) => (
+                                            <ScaleTouchableOpacity
+                                                key={`${x.device_name}_${i}`}
+                                                style={{ ...styles.device_box, borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(142, 142, 147, 1)' : 'rgba(58, 58, 60, 1)' }}
+                                                onPress={() => {
+                                                    this?.context?.setCurrentDeviceName(x.device_name);
+                                                    this.navigation.navigate('Tabs')
+                                                }}
+                                            >
+                                                <View style={styles.icon_style}>
+                                                    <FontAwesome name={x.device_type} size={50} color={this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)'} />
+                                                </View>
+
+                                                <View>
+                                                    <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)' }}>
+                                                        {x.device_name}
                                                     </Text>
-                                                )}
-                                            </View>
-                                        </ScaleTouchableOpacity>
-                                    )))
-                                }
+                                                    {x.device_name === this?.context?.credentials.device_name && (
+                                                        <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
+                                                            <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
+                                                        </Text>
+                                                    )}
+                                                </View>
+                                            </ScaleTouchableOpacity>
+                                        )))
+                                    }
+                                </View>
                             </ScrollView>
                             <View style={styles.footer_options} key="footer">
                                 <Pressable
@@ -267,9 +305,7 @@ const styles = StyleSheet.create({
     devices_container: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        padding: 15,
         justifyContent: 'center',
-        paddingBottom: 50,
     },
 
     device_box: {
