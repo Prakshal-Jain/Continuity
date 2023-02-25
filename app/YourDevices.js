@@ -159,6 +159,7 @@ class YourDevices extends Component {
     }
 
     render() {
+        const other_devices = this?.context?.devices?.filter(x => x.device_name !== this?.context?.credentials.device_name)
         return (
             <SafeAreaView style={[styles.root, { backgroundColor: (this?.context?.colorScheme === 'dark') ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)' }]}>
 
@@ -191,48 +192,52 @@ class YourDevices extends Component {
                                             <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? '#fff' : '#000' }}>
                                                 {this?.context?.credentials?.device_name}
                                             </Text>
-                                            <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
+                                            <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5 }}>
                                                 <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
                                             </Text>
                                         </View>
                                     </ScaleTouchableOpacity>
                                 )}
 
-                                <View
-                                    style={{
-                                        marginVertical: 15,
-                                    }}
-                                />
+                                {this?.context?.credentials && other_devices?.length > 0 && (
+                                    <View
+                                        style={{
+                                            marginVertical: 15,
+                                        }}
+                                    />
+                                )}
 
-                                <View style={styles.devices_container}>
-                                    {
-                                        this?.context?.devices?.filter(x => x.device_name !== this?.context?.credentials.device_name).map(((x, i) => (
-                                            <ScaleTouchableOpacity
-                                                key={`${x.device_name}_${i}`}
-                                                style={{ ...styles.device_box, borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(142, 142, 147, 1)' : 'rgba(58, 58, 60, 1)' }}
-                                                onPress={() => {
-                                                    this?.context?.setCurrentDeviceName(x.device_name);
-                                                    this.navigation.navigate('Tabs')
-                                                }}
-                                            >
-                                                <View style={styles.icon_style}>
-                                                    <FontAwesome name={x.device_type} size={50} color={this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)'} />
-                                                </View>
+                                {other_devices?.length > 0 && (
+                                    <View style={styles.devices_container}>
+                                        {
+                                            other_devices.map(((x, i) => (
+                                                <ScaleTouchableOpacity
+                                                    key={`${x.device_name}_${i}`}
+                                                    style={{ ...styles.device_box, borderColor: this?.context?.colorScheme === 'dark' ? 'rgba(142, 142, 147, 1)' : 'rgba(58, 58, 60, 1)' }}
+                                                    onPress={() => {
+                                                        this?.context?.setCurrentDeviceName(x.device_name);
+                                                        this.navigation.navigate('Tabs')
+                                                    }}
+                                                >
+                                                    <View style={styles.icon_style}>
+                                                        <FontAwesome name={x.device_type} size={50} color={this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)'} />
+                                                    </View>
 
-                                                <View>
-                                                    <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)' }}>
-                                                        {x.device_name}
-                                                    </Text>
-                                                    {x.device_name === this?.context?.credentials.device_name && (
-                                                        <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
-                                                            <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
+                                                    <View>
+                                                        <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)' }}>
+                                                            {x.device_name}
                                                         </Text>
-                                                    )}
-                                                </View>
-                                            </ScaleTouchableOpacity>
-                                        )))
-                                    }
-                                </View>
+                                                        {x.device_name === this?.context?.credentials.device_name && (
+                                                            <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
+                                                                <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                </ScaleTouchableOpacity>
+                                            )))
+                                        }
+                                    </View>
+                                )}
                             </ScrollView>
                             <View style={styles.footer_options} key="footer">
                                 <Pressable
