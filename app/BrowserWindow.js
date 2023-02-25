@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { View, TextInput, SafeAreaView, StatusBar, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text } from "react-native";
+import { View, TextInput, Alert, Linking, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text, PixelRatio } from "react-native";
 import { WebView } from "react-native-webview";
 import { StateContext } from "./state_context";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { URL } from 'react-native-url-polyfill';
 import extractDomain from "extract-domain";
+import { captureRef } from 'react-native-view-shot';
 
 
 /*
@@ -27,12 +28,15 @@ const isValidUrl = urlString => {
 
 
 const defaultURL = 'https://www.google.com/';
+const targetPixelCount = 360;
 
 export default function (props) {
     const { socket, colorScheme, credentials, privacy_domain_set } = useContext(StateContext);
     const incognito = props?.incognito ?? false;
     const source = props?.url ?? (incognito ? null : defaultURL);
     const target_device = props?.target_device;
+
+    const imageRef = useRef();
 
     useEffect(() => {
         if (incognito) {
@@ -190,13 +194,51 @@ export default function (props) {
         return title;
     }
 
-    const onBrowserLoad = (syntheticEvent) => {
-        const { canGoForward, canGoBack } = syntheticEvent.nativeEvent;
+
+    const pixelRatio = PixelRatio.get();
+    const pixels = targetPixelCount / pixelRatio;
+
+    const takeScreenshot = async () => {
+        const result = await captureRef(imageRef, {
+            result: 'tmpfile',
+            width: pixels,
+            quality: 0.5,
+            format: 'png',
+        });
+        console.log(result);
+    }
+
+    const onBrowserLoad = async (syntheticEvent) => {
+        const { canGoForward, canGoBack, title } = syntheticEvent.nativeEvent;
         setIsFirstRequest(true);
 
+        const curr_url = syntheticEvent?.nativeEvent?.url;
+
+        let parsedUrl;
+
+        try {
+            parsedUrl = new URL(curr_url);
+        }
+        catch (err) {
+            parsedUrl = null;
+        }
+
+        if (parsedUrl?.hostname === 'www.google.com' && parsedUrl?.pathname === '/search') {
+            // Extract the searched string from the q query parameter
+            const prompt = parsedUrl?.searchParams.get('q');
+            if (prompt !== undefined && prompt !== null && ultraSearchPrompt !== prompt) {
+                // A new prompt from user
+                setUltraSearchPrompt(parsedUrl?.searchParams.get('q') ?? title)
+            }
+        }
+        else {
+            setUltraSearchPrompt(title);
+        }
 
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
+
+        await takeScreenshot();
     }
 
     const onNavigationStateChange = (navState) => {
@@ -240,8 +282,11 @@ export default function (props) {
                 const prompt = parsedUrl?.searchParams.get('q');
                 if (prompt !== undefined && prompt !== null && ultraSearchPrompt !== prompt) {
                     // A new prompt from user
-                    setUltraSearchPrompt(parsedUrl?.searchParams.get('q'))
+                    setUltraSearchPrompt(parsedUrl?.searchParams.get('q') ?? title)
                 }
+            }
+            else {
+                setUltraSearchPrompt(title);
             }
         }
 
@@ -256,45 +301,89 @@ export default function (props) {
         }
     }
 
-    const onShouldStartLoadWithRequest = (request) => {
-        let returnBool = true;
-        if (!isFirstRequest) {
-            if (!incognito) {
-                const parsedUrl = new URL(request.url);
-                if (!(parsedUrl.hostname === 'www.google.com' && parsedUrl.pathname === '/search')) {
-                    const websiteHost = (new URL(url))?.hostname;
-                    const tracker = parsedUrl?.hostname;
-                    const trackerHost = extractDomain(tracker);
+    function verifyUrlType(url) {
 
-                    if (trackerHost !== null && trackerHost !== undefined && trackerHost !== '' && (!websiteHost.includes(trackerHost)) && websiteHost !== 'www.google.com' && trackerHost !== 'www.google.com') {
-                        socket?.emit('report_privacy_trackers', {
-                            'user_id': credentials?.user_id,
-                            'device_name': credentials?.device_name,
-                            "device_token": credentials?.device_token,
-                            target_device,
-                            "website_host": websiteHost,
-                            "tracker": trackerHost
-                        })
-                        if (privacy_domain_set.has(trackerHost)) {
-                            returnBool = false;
+        // short circuit these
+        if (!url ||
+            url.startsWith('http') ||
+            url.startsWith("/") ||
+            url.startsWith("#") ||
+            url.startsWith("javascript") ||
+            url.startsWith("about:blank")
+        ) {
+            return true;
+        }
+
+        // blocked blobs
+        if (url.startsWith("blob")) {
+            Alert.alert("Link cannot be opened.");
+            return false;
+        }
+
+        // list of schemas we will allow the webview
+        // to open natively
+        if (url.startsWith("tel:") ||
+            url.startsWith("mailto:") ||
+            url.startsWith("maps:") ||
+            url.startsWith("geo:") ||
+            url.startsWith("sms:")
+        ) {
+
+            Linking.openURL(url).catch(er => {
+                Alert.alert("Failed to open Link: " + er.message);
+            });
+            return false;
+        }
+
+        // let everything else to the webview
+        return true;
+    }
+
+    const onShouldStartLoadWithRequest = (request) => {
+
+        if (verifyUrlType(request?.url)) {
+            let returnBool = true;
+            if (!isFirstRequest) {
+                if (!incognito) {
+                    const parsedUrl = new URL(request.url);
+                    if (!(parsedUrl.hostname === 'www.google.com' && parsedUrl.pathname === '/search')) {
+                        const websiteHost = (new URL(url))?.hostname;
+                        const tracker = parsedUrl?.hostname;
+                        const trackerHost = extractDomain(tracker);
+
+                        if (trackerHost !== null && trackerHost !== undefined && trackerHost !== '' && (!websiteHost.includes(trackerHost)) && websiteHost !== 'www.google.com' && trackerHost !== 'www.google.com') {
+                            socket?.emit('report_privacy_trackers', {
+                                'user_id': credentials?.user_id,
+                                'device_name': credentials?.device_name,
+                                "device_token": credentials?.device_token,
+                                target_device,
+                                "website_host": websiteHost,
+                                "tracker": trackerHost
+                            })
+                            if (privacy_domain_set.has(trackerHost)) {
+                                returnBool = false;
+                            }
                         }
                     }
                 }
             }
-        }
-        else {
-            setIsFirstRequest(false);
-        }
-        // can prevent requests from fulfilling, good to log requests
-        // or filter ads and adult content.
+            else {
+                setIsFirstRequest(false);
+            }
+            // can prevent requests from fulfilling, good to log requests
+            // or filter ads and adult content.
 
-        // MUST return true for the request to pass through
-        if ((credentials?.enrolled_features?.privacy_prevention?.enrolled === true) && (credentials?.enrolled_features?.privacy_prevention?.switch === true)) {
-            // Filter and do not allow trackers when enrolled and switch in privacy_prevention
-            return returnBool;
+            // MUST return true for the request to pass through
+            if ((credentials?.enrolled_features?.privacy_prevention?.enrolled === true) && (credentials?.enrolled_features?.privacy_prevention?.switch === true)) {
+                // Filter and do not allow trackers when enrolled and switch in privacy_prevention
+                return returnBool;
+            }
+            else {
+                return true;
+            }
         }
         else {
-            return true;
+            return false
         }
     }
 
@@ -474,35 +563,37 @@ export default function (props) {
                 )
                 :
                 (
-                    <WebView
-                        ref={browserRef}
-                        originWhitelist={['*']}
-                        source={{ uri: url }}
-                        onLoad={onBrowserLoad}
-                        onLoadStart={() => setRefreshing(true)}
-                        onLoadEnd={() => setRefreshing(false)}
-                        onError={onBrowserError}
-                        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-                        onNavigationStateChange={onNavigationStateChange}
-                        onMessage={onBrowserMessage}
-                        dataDetectorTypes={config.detectorTypes}
-                        thirdPartyCookiesEnabled={config.allowCookies}
-                        domStorageEnabled={config.allowStorage}     // Allow webview to use localStorage and sessionStorage APIs.
-                        javaScriptEnabled={config.allowJavascript}
-                        geolocationEnabled={config.allowLocation}
-                        cacheEnabled={config.allowCaching}
-                        injectedJavaScript={injectedJavaScript}
-                        pullToRefreshEnabled={true}
-                        allowsBackForwardNavigationGestures={true}
-                        mediaPlaybackRequiresUserAction={false}
-                        allowsLinkPreview={true}
-                        // allowsFullscreenVideo={false}
-                        allowsInlineMediaPlayback={true}
-                        onContentProcessDidTerminate={() => setURL(defaultURL)}     // Handler when webview process terminates (change the source to default page)
-                        style={{ backgroundColor: (colorScheme === 'dark' || incognito) ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)', flex: 1 }}
-                        onScroll={handleScroll}
-                        incognito={incognito}
-                    />
+                    <View ref={imageRef} style={{ flex: 1 }}>
+                        <WebView
+                            ref={browserRef}
+                            originWhitelist={['*']}
+                            source={{ uri: url }}
+                            onLoad={onBrowserLoad}
+                            onLoadStart={() => setRefreshing(true)}
+                            onLoadEnd={() => setRefreshing(false)}
+                            onError={onBrowserError}
+                            onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+                            onNavigationStateChange={onNavigationStateChange}
+                            onMessage={onBrowserMessage}
+                            dataDetectorTypes={config.detectorTypes}
+                            thirdPartyCookiesEnabled={config.allowCookies}
+                            domStorageEnabled={config.allowStorage}     // Allow webview to use localStorage and sessionStorage APIs.
+                            javaScriptEnabled={config.allowJavascript}
+                            geolocationEnabled={config.allowLocation}
+                            cacheEnabled={config.allowCaching}
+                            injectedJavaScript={injectedJavaScript}
+                            pullToRefreshEnabled={true}
+                            allowsBackForwardNavigationGestures={true}
+                            mediaPlaybackRequiresUserAction={false}
+                            allowsLinkPreview={true}
+                            // allowsFullscreenVideo={false}
+                            allowsInlineMediaPlayback={true}
+                            onContentProcessDidTerminate={() => setURL(defaultURL)}     // Handler when webview process terminates (change the source to default page)
+                            style={{ backgroundColor: (colorScheme === 'dark' || incognito) ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)', flex: 1 }}
+                            onScroll={handleScroll}
+                            incognito={incognito}
+                        />
+                    </View>
                 )
             }
 
