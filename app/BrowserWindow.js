@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { View, TextInput, Alert, Linking, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text } from "react-native";
+import { View, TextInput, Alert, Linking, StyleSheet, KeyboardAvoidingView, Animated, Keyboard, ActivityIndicator, Share, ScrollView, Text, PixelRatio } from "react-native";
 import { WebView } from "react-native-webview";
 import { StateContext } from "./state_context";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,6 +8,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { URL } from 'react-native-url-polyfill';
 import extractDomain from "extract-domain";
+import { captureRef } from 'react-native-view-shot';
+import storage from "./utilities/storage";
 
 
 /*
@@ -27,12 +29,15 @@ const isValidUrl = urlString => {
 
 
 const defaultURL = 'https://www.google.com/';
+const targetPixelCount = 360;
 
 export default function (props) {
     const { socket, colorScheme, credentials, privacy_domain_set } = useContext(StateContext);
     const incognito = props?.incognito ?? false;
     const source = props?.url ?? (incognito ? null : defaultURL);
     const target_device = props?.target_device;
+
+    const imageRef = useRef();
 
     useEffect(() => {
         if (incognito) {
@@ -190,7 +195,21 @@ export default function (props) {
         return title;
     }
 
-    const onBrowserLoad = (syntheticEvent) => {
+
+    const pixelRatio = PixelRatio.get();
+    const pixels = targetPixelCount / pixelRatio;
+
+    const takeScreenshot = async () => {
+        const result = await captureRef(imageRef, {
+            result: 'base64',
+            width: pixels,
+            quality: 0.5,
+            format: 'png',
+        });
+        await storage.set(`${props?.target_device}_${props?.id}`, result);
+    }
+
+    const onBrowserLoad = async (syntheticEvent) => {
         const { canGoForward, canGoBack, title } = syntheticEvent.nativeEvent;
         setIsFirstRequest(true);
 
@@ -219,6 +238,8 @@ export default function (props) {
 
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
+
+        await takeScreenshot();
     }
 
     const onNavigationStateChange = (navState) => {
@@ -543,35 +564,37 @@ export default function (props) {
                 )
                 :
                 (
-                    <WebView
-                        ref={browserRef}
-                        originWhitelist={['*']}
-                        source={{ uri: url }}
-                        onLoad={onBrowserLoad}
-                        onLoadStart={() => setRefreshing(true)}
-                        onLoadEnd={() => setRefreshing(false)}
-                        onError={onBrowserError}
-                        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-                        onNavigationStateChange={onNavigationStateChange}
-                        onMessage={onBrowserMessage}
-                        dataDetectorTypes={config.detectorTypes}
-                        thirdPartyCookiesEnabled={config.allowCookies}
-                        domStorageEnabled={config.allowStorage}     // Allow webview to use localStorage and sessionStorage APIs.
-                        javaScriptEnabled={config.allowJavascript}
-                        geolocationEnabled={config.allowLocation}
-                        cacheEnabled={config.allowCaching}
-                        injectedJavaScript={injectedJavaScript}
-                        pullToRefreshEnabled={true}
-                        allowsBackForwardNavigationGestures={true}
-                        mediaPlaybackRequiresUserAction={false}
-                        allowsLinkPreview={true}
-                        // allowsFullscreenVideo={false}
-                        allowsInlineMediaPlayback={true}
-                        onContentProcessDidTerminate={() => setURL(defaultURL)}     // Handler when webview process terminates (change the source to default page)
-                        style={{ backgroundColor: (colorScheme === 'dark' || incognito) ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)', flex: 1 }}
-                        onScroll={handleScroll}
-                        incognito={incognito}
-                    />
+                    <View ref={imageRef} style={{ flex: 1 }}>
+                        <WebView
+                            ref={browserRef}
+                            originWhitelist={['*']}
+                            source={{ uri: url }}
+                            onLoad={onBrowserLoad}
+                            onLoadStart={() => setRefreshing(true)}
+                            onLoadEnd={() => setRefreshing(false)}
+                            onError={onBrowserError}
+                            onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+                            onNavigationStateChange={onNavigationStateChange}
+                            onMessage={onBrowserMessage}
+                            dataDetectorTypes={config.detectorTypes}
+                            thirdPartyCookiesEnabled={config.allowCookies}
+                            domStorageEnabled={config.allowStorage}     // Allow webview to use localStorage and sessionStorage APIs.
+                            javaScriptEnabled={config.allowJavascript}
+                            geolocationEnabled={config.allowLocation}
+                            cacheEnabled={config.allowCaching}
+                            injectedJavaScript={injectedJavaScript}
+                            pullToRefreshEnabled={true}
+                            allowsBackForwardNavigationGestures={true}
+                            mediaPlaybackRequiresUserAction={false}
+                            allowsLinkPreview={true}
+                            // allowsFullscreenVideo={false}
+                            allowsInlineMediaPlayback={true}
+                            onContentProcessDidTerminate={() => setURL(defaultURL)}     // Handler when webview process terminates (change the source to default page)
+                            style={{ backgroundColor: (colorScheme === 'dark' || incognito) ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)', flex: 1 }}
+                            onScroll={handleScroll}
+                            incognito={incognito}
+                        />
+                    </View>
                 )
             }
 

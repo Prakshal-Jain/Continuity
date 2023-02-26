@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TextInput, Image, TouchableOpacity, Animated, Pressable, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TextInput, Image, TouchableOpacity, Animated, Pressable, Alert, ImageBackground } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -11,6 +11,8 @@ import incognitoIcon from "./assets/incognito.png";
 import * as Haptics from 'expo-haptics';
 import Loader from "./components/Loader";
 import UnifiedError from "./components/UnifiedError";
+import preview_tab from './assets/preview_tab.png';
+import { LinearGradient } from 'expo-linear-gradient';
 
 class Tabs extends Component {
     static contextType = StateContext;
@@ -103,7 +105,9 @@ class Tabs extends Component {
 
             <UnifiedError currentPage={this.props?.route_name} />
 
-            {tabs}
+            <View style={{ flexDirection: 'row', flexWrap: "wrap", alignItems: "center" }}>
+                {tabs}
+            </View>
         </View>
     )
 
@@ -124,12 +128,9 @@ class Tabs extends Component {
             }
 
             tabs.push(
-                <ScaleXView key={key} deleteScaleRef={deleteScaleRef}>
-                    <View style={[styles.tabTitle, {
-                        backgroundColor: 'rgba(58, 58, 60, 1)',
-                        borderColor: 'rgba(99, 99, 102, 1)',
-                    }]}>
-                        <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
+                <ScaleXView key={key} deleteScaleRef={deleteScaleRef} style={{ width: '50%' }}>
+                    <ImageBackground source={preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={10} defaultSource={preview_tab}>
+                        {/* <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
                             <Image
                                 style={{ width: 40, height: 40, resizeMode: "contain", borderRadius: 10, }}
                                 source={(tab?.is_incognito === true && tab?.url === null) ? incognitoIcon : { uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${tab?.url}&sz=64` }}
@@ -137,8 +138,34 @@ class Tabs extends Component {
                             />
                             <Text style={{ color: 'white', fontSize: 17, marginHorizontal: 15, flex: 1 }} numberOfLines={2}>{tab.title}</Text>
                         </TouchableOpacity>
-                        <FontAwesome name="close" size={25} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} onPress={onDelete} />
-                    </View>
+                         */}
+                        <LinearGradient
+                            // Button Linear Gradient
+                            style={{ borderTopLeftRadius: 8, borderTopRightRadius: 8, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: "center" }}
+                            colors={['rgba(58, 58, 60, 1)', 'rgba(58, 58, 60, 0.6)', 'rgba(58, 58, 60, 0)']}
+                        >
+                            <Image
+                                style={{ width: 30, height: 30, resizeMode: "contain", borderRadius: 5 }}
+                                source={(tab?.is_incognito === true && tab?.url === null) ? incognitoIcon : { uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${tab?.url}&sz=64` }}
+                                defaultSource={(tab?.is_incognito === true) ? incognitoIcon : webIcon}
+                            />
+                            <TouchableOpacity style={{ backgroundColor: '#000', borderRadius: 30, padding: 5, width: 30, height: 30, alignItems: "center", justifyContent: "center" }} onPress={onDelete}>
+                                <FontAwesome name="close" size={20} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} />
+                            </TouchableOpacity>
+                        </LinearGradient>
+
+                        <TouchableOpacity style={{ flex: 1 }} onPress={() => this.props.switchCurrOpenWindow(key)}></TouchableOpacity>
+
+                        <LinearGradient
+                            // Button Linear Gradient
+                            style={{ borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}
+                            colors={['rgba(58, 58, 60, 0)', 'rgba(58, 58, 60, 0.6)', 'rgba(58, 58, 60, 1)']}
+                        >
+                            <TouchableOpacity style={{ paddingBottom: 7, paddingTop: 10, paddingHorizontal: 10 }} onPress={() => this.props.switchCurrOpenWindow(key)}>
+                                <Text style={{ color: 'white' }} numberOfLines={1}>{tab.title}</Text>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                    </ImageBackground>
                 </ScaleXView>
             )
         }
@@ -211,13 +238,7 @@ class Tabs extends Component {
                         (
                             <>
                                 {this.renderSearchWithTabs(this.props.isIncognitoView ? incognitoTabsList : regularTabsList)}
-                                {
-                                    (this.props.isIncognitoView)
-                                        ?
-                                        (tabCount === 0 && this.renderNoOpenTabs())
-                                        :
-                                        (tabCount === 0 && this.renderNoOpenTabs())
-                                }
+                                {(tabCount === 0 && this.renderNoOpenTabs())}
                             </>
                         )
                     }
@@ -325,16 +346,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         alignItems: "center"
     },
-    tabTitle: {
-        alignItems: "center",
-        borderWidth: 1,
-        borderRadius: 10,
-        marginVertical: 10,
-        marginHorizontal: 20,
-        flexDirection: "row",
-        paddingVertical: 20,
-        paddingHorizontal: 15
-    },
     footer_options: {
         alignItems: 'center',
         flexDirection: 'row',
@@ -360,6 +371,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
         fontSize: 15,
         borderWidth: 0,
+    },
+
+    image: {
+        borderRadius: 30,
+        height: 220,
+        margin: 15,
     },
 });
 
