@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Animated, SafeAreaView, StatusBar } from 'react-native';
-import Browser from './Browser';
+import { StyleSheet, View, Animated, SafeAreaView } from 'react-native';
 import Tabs from './Tabs';
 import { StateContext } from "./state_context";
 import BrowserWindow from './BrowserWindow';
@@ -146,13 +145,19 @@ class TabsManager extends React.Component {
         })
     }
 
+    updateScreenshot = (device_name, id, img_data) => {
+        if (this.state.tabs_data.device_name === device_name && this.state.metadata.has(id)) {
+            // TODO --> Save the screenshot (img_data) here and update the metadata
+        }
+    }
+
     switchCurrOpenWindow = (tabIdx) => {
         if (tabIdx !== -1) {
             if (!this.state.tabs.has(tabIdx)) {
                 const tabs = this.state.tabs;
 
                 tabs.set(tabIdx, {
-                    browser: <BrowserWindow url={(this.state.metadata?.get(tabIdx))?.url} incognito={(this.state.metadata?.get(tabIdx))?.is_incognito} setMetaData={(value) => this.setState({ metadata: value })} switchCurrOpenWindow={this.switchCurrOpenWindow} id={tabIdx} key={tabIdx} metadata={this.state.metadata} target_device={this.state.tabs_data?.device_name} navigation={this.props?.navigation} />,
+                    browser: <BrowserWindow url={(this.state.metadata?.get(tabIdx))?.url} incognito={(this.state.metadata?.get(tabIdx))?.is_incognito} setMetaData={(value) => this.setState({ metadata: value })} switchCurrOpenWindow={this.switchCurrOpenWindow} id={tabIdx} key={tabIdx} metadata={this.state.metadata} target_device={this.state.tabs_data?.device_name} navigation={this.props?.navigation} updateScreenshot={this.updateScreenshot} />,
                     animation: new Animated.Value(0),
                 })
 
@@ -196,7 +201,7 @@ class TabsManager extends React.Component {
 
         const tabsBackup = this.state.tabs;
         tabsBackup?.set(uniqueID, {
-            browser: <BrowserWindow url={url} incognito={isIncognito} setMetaData={(value) => this.setState({ metadata: value })} switchCurrOpenWindow={this.switchCurrOpenWindow} id={uniqueID} key={uniqueID} metadata={this.state.metadata} target_device={this.state.tabs_data?.device_name} navigation={this.props?.navigation} />,
+            browser: <BrowserWindow url={url} incognito={isIncognito} setMetaData={(value) => this.setState({ metadata: value })} switchCurrOpenWindow={this.switchCurrOpenWindow} id={uniqueID} key={uniqueID} metadata={this.state.metadata} target_device={this.state.tabs_data?.device_name} navigation={this.props?.navigation} updateScreenshot={this.updateScreenshot} />,
             animation: new Animated.Value(0),
         });
 
