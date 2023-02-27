@@ -3,6 +3,7 @@ import { StyleSheet, View, Animated, SafeAreaView } from 'react-native';
 import Tabs from './Tabs';
 import { StateContext } from "./state_context";
 import BrowserWindow from './BrowserWindow';
+import storage from './utilities/storage';
 
 class TabsManager extends React.Component {
     static contextType = StateContext;
@@ -25,9 +26,15 @@ class TabsManager extends React.Component {
             this?.context?.socket.emit("get_my_tabs", { "user_id": this?.context?.credentials?.user_id, "device_name": this?.context?.credentials?.device_name, "device_token": this?.context?.credentials?.device_token, "target_device": this.state.tabs_data?.device_name })
         })
 
-        this?.context?.socket.on("get_my_tabs", (data) => {
+        this?.context?.socket.on("get_my_tabs", async (data) => {
             if (data?.successful === true) {
-                const metadata_list = Object.entries(data?.message).map(([key, value]) => [Number(key), value]);
+                const metadata_list = [];
+                for(const key in data?.message){
+                    const value = data?.message[key];
+                    const img_data = await storage.get(`${this.state.tabs_data?.device_name}_${key}`);
+                    metadata_list.push([Number(key), { thumbnail: img_data, ...value }]);
+                }
+
                 const id = metadata_list.length === 0 ? 0 : ((metadata_list.reduce((a, b) => a[1] > b[1] ? a : b, 0)[0]) + 1);
                 this.setState({ metadata: new Map(metadata_list), id: id, loading: false }, () => {
                     if (this.props?.route?.params?.url !== undefined && this.props?.route?.params?.url !== null) {
@@ -46,7 +53,7 @@ class TabsManager extends React.Component {
             }
         })
 
-        this?.context?.socket.on('add_tab', (data) => {
+        this?.context?.socket.on('add_tab', async (data) => {
             if (data?.successful === true) {
                 if (data?.message?.target_device !== this.state.tabs_data?.device_name) {
                     return
@@ -62,13 +69,14 @@ class TabsManager extends React.Component {
                     id: id,
                 });
                 this?.context?.setError(null);
+                await storage.remove(`${this.state.tabs_data?.device_name}_${idx}`);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
             }
         });
 
-        this?.context?.socket.on('update_tab', (data) => {
+        this?.context?.socket.on('update_tab', async (data) => {
             if (data?.successful === true) {
                 if (data?.message?.target_device !== this.state.tabs_data?.device_name) {
                     return
@@ -90,17 +98,21 @@ class TabsManager extends React.Component {
                     this.setState({ tabs: tabs_backup });
                 }
                 this?.context?.setError(null);
+
+                await storage.remove(`${this.state.tabs_data?.device_name}_${idx}`);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
             }
         });
 
-        this?.context?.socket.on('remove_all_tabs', (data) => {
+        this?.context?.socket.on('remove_all_tabs', async (data) => {
             if (data?.successful === true) {
                 if (data?.message?.target_device !== this.state.tabs_data?.device_name) {
                     return
                 }
+
+                const metadata_keys = this.state.metadata?.keys();
 
                 this.setState({
                     currOpenTab: -1,
@@ -109,6 +121,10 @@ class TabsManager extends React.Component {
                     metadata: new Map(),
                 })
                 this?.context?.setError(null);
+
+                for (const key of metadata_keys) {
+                    await storage.remove(`${this.state.tabs_data?.device_name}_${key}`);
+                }
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -145,9 +161,11 @@ class TabsManager extends React.Component {
         })
     }
 
-    updateScreenshot = (device_name, id, img_data) => {
+    updateScreenshot = async (device_name, id, img_data) => {
         if (this.state.tabs_data.device_name === device_name && this.state.metadata.has(id)) {
             // TODO --> Save the screenshot (img_data) here and update the metadata
+            this.state.metadata?.set(id, { thumbnail: img_data, ...this.state.metadata.get(id) });
+            await storage.set(`${device_name}_${id}`, img_data);
         }
     }
 

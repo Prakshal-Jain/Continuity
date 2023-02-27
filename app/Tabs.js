@@ -129,7 +129,7 @@ class Tabs extends Component {
 
             tabs.push(
                 <ScaleXView key={key} deleteScaleRef={deleteScaleRef} style={{ width: '50%' }}>
-                    <ImageBackground source={preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={10} defaultSource={preview_tab}>
+                    <ImageBackground source={tab?.thumbnail ? { uri: `data:image/png;base64,${tab?.thumbnail}` } : preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={tab?.thumbnail ? 0 : 10} defaultSource={preview_tab}>
                         {/* <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
                             <Image
                                 style={{ width: 40, height: 40, resizeMode: "contain", borderRadius: 10, }}
@@ -162,7 +162,7 @@ class Tabs extends Component {
                             colors={['rgba(58, 58, 60, 0)', 'rgba(58, 58, 60, 0.6)', 'rgba(58, 58, 60, 1)']}
                         >
                             <TouchableOpacity style={{ paddingBottom: 7, paddingTop: 10, paddingHorizontal: 10 }} onPress={() => this.props.switchCurrOpenWindow(key)}>
-                                <Text style={{ color: 'white' }} numberOfLines={1}>{tab.title}</Text>
+                                <Text style={{ color: 'white', textAlign: "center" }} numberOfLines={1}>{tab.title}</Text>
                             </TouchableOpacity>
                         </LinearGradient>
                     </ImageBackground>

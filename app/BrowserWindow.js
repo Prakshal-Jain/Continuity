@@ -206,10 +206,10 @@ export default function (props) {
             quality: 0.5,
             format: 'png',
         });
-        await storage.set(`${props?.target_device}_${props?.id}`, result);
+        props?.updateScreenshot(props?.target_device, props?.id, result);
     }
 
-    const onBrowserLoad = async (syntheticEvent) => {
+    const onBrowserLoad = (syntheticEvent) => {
         const { canGoForward, canGoBack, title } = syntheticEvent.nativeEvent;
         setIsFirstRequest(true);
 
@@ -238,11 +238,9 @@ export default function (props) {
 
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
-
-        await takeScreenshot();
     }
 
-    const onNavigationStateChange = (navState) => {
+    const onNavigationStateChange = async (navState) => {
         const { title } = navState;
         const curr_url = navState?.url;
         const updated_title = generateTitle(title, curr_url);
@@ -253,7 +251,9 @@ export default function (props) {
         if (metadataCopy?.has(props?.id) && (metadataCopy?.get(props?.id)).url !== url) {
             socket?.emit("update_tab", { 'user_id': credentials?.user_id, 'device_name': credentials?.device_name, "device_token": credentials?.device_token, "target_device": props?.target_device, "tabs_data": { [props.id]: tab_metadata } })
         }
-        metadataCopy?.set(props.id, tab_metadata);
+
+        const img_data = await storage.get(`${props?.target_device}_${props.id}`);
+        metadataCopy?.set(props.id, { ...tab_metadata, thumbnail: img_data });
         props.setMetaData(metadataCopy);
 
 
@@ -300,6 +300,8 @@ export default function (props) {
         else {
             setURLHelper(curr_url);
         }
+
+        await takeScreenshot();
     }
 
     function verifyUrlType(url) {
@@ -340,7 +342,7 @@ export default function (props) {
         return true;
     }
 
-    const onShouldStartLoadWithRequest = (request) => {
+    const onShouldStartLoadWithRequest = async (request) => {
 
         if (verifyUrlType(request?.url)) {
             let returnBool = true;
@@ -370,6 +372,7 @@ export default function (props) {
             }
             else {
                 setIsFirstRequest(false);
+                await takeScreenshot();
             }
             // can prevent requests from fulfilling, good to log requests
             // or filter ads and adult content.
@@ -570,8 +573,13 @@ export default function (props) {
                             originWhitelist={['*']}
                             source={{ uri: url }}
                             onLoad={onBrowserLoad}
-                            onLoadStart={() => setRefreshing(true)}
-                            onLoadEnd={() => setRefreshing(false)}
+                            onLoadStart={() => {
+                                setRefreshing(true)
+                            }}
+                            onLoadEnd={async () => {
+                                setRefreshing(false);
+                                await takeScreenshot();
+                            }}
                             onError={onBrowserError}
                             onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
                             onNavigationStateChange={onNavigationStateChange}
