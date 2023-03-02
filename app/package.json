@@ -23,9 +23,12 @@
     "expo": "~46.0.19",
     "expo-auth-session": "~3.7.4",
     "expo-clipboard": "~3.1.0",
+    "expo-device": "~4.3.0",
+    "expo-file-system": "^15.2.2",
     "expo-haptics": "~11.3.0",
     "expo-linear-gradient": "~11.4.0",
     "expo-localization": "~13.1.0",
+    "expo-notifications": "~0.16.1",
     "expo-random": "~12.3.0",
     "expo-splash-screen": "~0.16.2",
     "expo-status-bar": "~1.4.0",
@@ -57,9 +60,7 @@
     "react-native-view-shot": "^3.3.0",
     "react-native-web": "~0.18.7",
     "react-native-webview": "11.23.0",
-    "socket.io-client": "^4.5.3",
-    "expo-notifications": "~0.16.1",
-    "expo-device": "~4.3.0"
+    "socket.io-client": "^4.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

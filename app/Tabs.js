@@ -129,7 +129,7 @@ class Tabs extends Component {
 
             tabs.push(
                 <ScaleXView key={key} deleteScaleRef={deleteScaleRef} style={{ width: '50%' }}>
-                    <ImageBackground source={tab?.thumbnail ? { uri: `data:image/png;base64,${tab?.thumbnail}` } : preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={tab?.thumbnail ? 0 : 10} defaultSource={preview_tab}>
+                    <ImageBackground source={tab?.thumbnail ? { uri: tab?.thumbnail } : preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={tab?.thumbnail ? 0 : 10} defaultSource={preview_tab}>
                         {/* <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
                             <Image
                                 style={{ width: 40, height: 40, resizeMode: "contain", borderRadius: 10, }}
@@ -189,12 +189,9 @@ class Tabs extends Component {
             }
 
             tabs.push(
-                <ScaleXView key={key} deleteScaleRef={deleteScaleRef}>
-                    <View style={[styles.tabTitle, {
-                        backgroundColor: (tab?.is_incognito === true) ? '#000' : 'rgba(58, 58, 60, 1)',
-                        borderColor: (tab?.is_incognito === true) ? 'rgba(58, 58, 60, 1)' : 'rgba(99, 99, 102, 1)',
-                    }]}>
-                        <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
+                <ScaleXView key={key} deleteScaleRef={deleteScaleRef} style={{ width: '50%' }}>
+                    <ImageBackground source={tab?.thumbnail ? { uri: tab?.thumbnail } : preview_tab} resizeMode="center" style={styles.image} borderRadius={10} blurRadius={tab?.thumbnail ? 0 : 10} defaultSource={preview_tab}>
+                        {/* <TouchableOpacity onPress={() => this.props.switchCurrOpenWindow(key)} style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
                             <Image
                                 style={{ width: 40, height: 40, resizeMode: "contain", borderRadius: 10, }}
                                 source={(tab?.is_incognito === true && tab?.url === null) ? incognitoIcon : { uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${tab?.url}&sz=64` }}
@@ -202,11 +199,38 @@ class Tabs extends Component {
                             />
                             <Text style={{ color: 'white', fontSize: 17, marginHorizontal: 15, flex: 1 }} numberOfLines={2}>{tab.title}</Text>
                         </TouchableOpacity>
-                        <FontAwesome name="close" size={25} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} onPress={onDelete} />
-                    </View>
+                         */}
+                        <LinearGradient
+                            // Button Linear Gradient
+                            style={{ borderTopLeftRadius: 8, borderTopRightRadius: 8, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: "center" }}
+                            colors={['rgba(58, 58, 60, 1)', 'rgba(58, 58, 60, 0.6)', 'rgba(58, 58, 60, 0)']}
+                        >
+                            <Image
+                                style={{ width: 30, height: 30, resizeMode: "contain", borderRadius: 5 }}
+                                source={(tab?.is_incognito === true && tab?.url === null) ? incognitoIcon : { uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${tab?.url}&sz=64` }}
+                                defaultSource={(tab?.is_incognito === true) ? incognitoIcon : webIcon}
+                            />
+                            <TouchableOpacity style={{ backgroundColor: '#000', borderRadius: 30, padding: 5, width: 30, height: 30, alignItems: "center", justifyContent: "center" }} onPress={onDelete}>
+                                <FontAwesome name="close" size={20} color={this?.context?.colorScheme === 'dark' ? 'rgba(255, 55, 95, 1)' : 'rgba(255, 45, 85, 1)'} />
+                            </TouchableOpacity>
+                        </LinearGradient>
+
+                        <TouchableOpacity style={{ flex: 1 }} onPress={() => this.props.switchCurrOpenWindow(key)}></TouchableOpacity>
+
+                        <LinearGradient
+                            // Button Linear Gradient
+                            style={{ borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}
+                            colors={['rgba(58, 58, 60, 0)', 'rgba(58, 58, 60, 0.6)', 'rgba(58, 58, 60, 1)']}
+                        >
+                            <TouchableOpacity style={{ paddingBottom: 7, paddingTop: 10, paddingHorizontal: 10 }} onPress={() => this.props.switchCurrOpenWindow(key)}>
+                                <Text style={{ color: 'white', textAlign: "center" }} numberOfLines={1}>{tab.title}</Text>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                    </ImageBackground>
                 </ScaleXView>
             )
         }
+
         return tabs;
     }
 

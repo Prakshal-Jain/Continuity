@@ -201,7 +201,7 @@ export default function (props) {
 
     const takeScreenshot = async () => {
         const result = await captureRef(imageRef, {
-            result: 'base64',
+            result: 'tmpfile',
             width: pixels,
             quality: 0.5,
             format: 'png',

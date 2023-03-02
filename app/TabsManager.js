@@ -4,6 +4,7 @@ import Tabs from './Tabs';
 import { StateContext } from "./state_context";
 import BrowserWindow from './BrowserWindow';
 import storage from './utilities/storage';
+import * as FileSystem from 'expo-file-system';
 
 class TabsManager extends React.Component {
     static contextType = StateContext;
@@ -29,7 +30,7 @@ class TabsManager extends React.Component {
         this?.context?.socket.on("get_my_tabs", async (data) => {
             if (data?.successful === true) {
                 const metadata_list = [];
-                for(const key in data?.message){
+                for (const key in data?.message) {
                     const value = data?.message[key];
                     const img_data = await storage.get(`${this.state.tabs_data?.device_name}_${key}`);
                     metadata_list.push([Number(key), { thumbnail: img_data, ...value }]);
@@ -69,7 +70,7 @@ class TabsManager extends React.Component {
                     id: id,
                 });
                 this?.context?.setError(null);
-                await storage.remove(`${this.state.tabs_data?.device_name}_${idx}`);
+                await this.deleteScreenshot(this.state.tabs_data?.device_name, idx);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -99,7 +100,7 @@ class TabsManager extends React.Component {
                 }
                 this?.context?.setError(null);
 
-                await storage.remove(`${this.state.tabs_data?.device_name}_${idx}`);
+                await this.deleteScreenshot(this.state.tabs_data?.device_name, idx);
             }
             else {
                 this?.context?.setError({ message: data?.message, type: data?.type, displayPages: new Set(["Tabs"]) });
@@ -123,7 +124,7 @@ class TabsManager extends React.Component {
                 this?.context?.setError(null);
 
                 for (const key of metadata_keys) {
-                    await storage.remove(`${this.state.tabs_data?.device_name}_${key}`);
+                    await this.deleteScreenshot(this.state.tabs_data?.device_name, key)
                 }
             }
             else {
@@ -165,7 +166,18 @@ class TabsManager extends React.Component {
         if (this.state.tabs_data.device_name === device_name && this.state.metadata.has(id)) {
             // TODO --> Save the screenshot (img_data) here and update the metadata
             this.state.metadata?.set(id, { thumbnail: img_data, ...this.state.metadata.get(id) });
+            await this.deleteScreenshot(device_name, id);
             await storage.set(`${device_name}_${id}`, img_data);
+        }
+    }
+
+    deleteScreenshot = async (device_name, id) => {
+        const img_path = await storage.get(`${device_name}_${id}`);
+        if (img_path !== null && img_path !== undefined && img_path?.length > 0) {
+            // First remove the image file
+            // Delete the file
+            await FileSystem.deleteAsync(img_path, { idempotent: true });
+            await storage.remove(`${device_name}_${id}`);
         }
     }
 

@@ -159,7 +159,7 @@ class YourDevices extends Component {
     }
 
     render() {
-        const other_devices = this?.context?.devices?.filter(x => x.device_name !== this?.context?.credentials.device_name)
+        const other_devices = this?.context?.devices?.filter(x => x.device_name !== this?.context?.credentials?.device_name)
         return (
             <SafeAreaView style={[styles.root, { backgroundColor: (this?.context?.colorScheme === 'dark') ? 'rgba(28, 28, 30, 1)' : 'rgba(242, 242, 247, 1)' }]}>
 
@@ -227,7 +227,7 @@ class YourDevices extends Component {
                                                         <Text style={{ textAlign: 'center', color: this?.context?.colorScheme === 'dark' ? 'rgba(199, 199, 204, 1)' : 'rgba(72, 72, 74, 1)' }}>
                                                             {x.device_name}
                                                         </Text>
-                                                        {x.device_name === this?.context?.credentials.device_name && (
+                                                        {x.device_name === this?.context?.credentials?.device_name && (
                                                             <Text style={{ textAlign: 'center', color: '#1B8E2D', marginTop: 5, }}>
                                                                 <FontAwesome name={'circle'} color="#1B8E2D" /> This Device
                                                             </Text>
